@@ -1,0 +1,277 @@
+/* 
+    Document   : performancereview
+    Created on : Mar 14, 2012, 10:06:50 AM
+    Author     : abner.zhou
+    Description:
+        Purpose of the stylesheet follows.
+*/
+/*************************Base CSS for basic page layout********************************/
+.pr_page {
+    width: 920px;
+    padding: 0 40px;
+    background: #FFF;
+    margin: 0 auto;
+    border-top: 3px solid #EEEEEE;
+}
+
+.pr_content{
+    width: 100%;
+    height:auto;
+    min-height:500px;
+    border-top: 1px solid #EEEEEE;
+}
+.pr_content div {
+/*    height:99%;*/
+}
+
+.pr_content .pr_content_left {
+    width: 200px;
+    float: left;
+}
+
+.pr_content .pr_content_right {
+    width: 716px;
+    border-left:1px solid #EEEEEE;
+    min-height:500px;
+    margin-left: 203px;
+}
+.pr_footer {
+/*    height: 25px;*/
+}
+
+/*css for my working stage*/
+.pr_workingstage_connent{
+    margin-left: 20px;
+}
+
+.pr_view_feedback{
+    margin-left: 20px;
+    width:700px;
+    overflow:auto;
+}
+
+.pr_content .pr_content_left ul li {
+    margin-left: 14px;
+    margin-top: 10px;
+}
+
+.validate_error {
+    color: red;
+    font-size: 0.85em;
+    margin-left: 14px;
+}
+
+/***********************CSS For block subject************************************/
+div.block_im_subject img {
+    width: 90px;
+    height: 90px;
+}
+div.block_im_subject label {
+    width: 600px;
+    float: right;
+    margin-top: 32px;
+}
+
+/****************************************CSS for tabs******************/
+.pr360-tabs {
+    line-height: 27px;
+    text-transform: uppercase;
+}
+.pr360-tabs li {
+    display: inline;
+    list-style: none;
+}
+.pr360-tabs li a,
+.pr360-tabs li a:active,
+.pr360-tabs li a:visited,
+.pr360-tabs li a:hover {
+    background-color: #a6a7a2;
+    -moz-border-radius: 8px 8px 0 0;
+    -webkit-border-top-left-radius: 8px;
+    -webkit-border-top-right-radius: 8px;
+    border-radius: 8px 8px 0 0;
+    color: #000;
+    display: inline-block;
+    font-size: 11px;
+    font-weight: bold;
+    margin: 0 0 2px 0;
+    outline: 0;
+    padding: 0 14px;
+    text-decoration: none;
+}
+.pr360-tabs li.active a,
+.pr360-tabs li.active a.active,
+.pr360-tabs li.active a:active,
+.pr360-tabs li.active a:visited {
+    color: #fff;
+    margin: 0;
+}
+.pr360-tabs li a:focus,
+.pr360-tabs li a:hover {
+    color: #fff;
+}
+.pr360-tabs li.active a:focus,
+.pr360-tabs li.active a:hover {
+    color: #000;
+}
+
+.hidden_box, #error_message, #status_message, .loading_img, .status_loading_img {
+    display: none;
+}
+#review_description {
+    margin: 20px 28px;
+}
+#review_description #description {
+    width: 448px;
+}
+
+.bubble {
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    background: #f5f4f4; 
+    
+    -webkit-box-shadow: inset -1px -1px 0px rgba(0,0,0,.2);
+    -moz-box-shadow: inset -1px -1px 0px rgba(0,0,0,.2);
+    box-shadow: inset -1px -1px 0px rgba(0,0,0,.2);
+}
+
+.assessmentbubble {
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    background: #ffe7e7; 
+    
+    -webkit-box-shadow: inset -1px -1px 0px rgba(0,0,0,.2);
+    -moz-box-shadow: inset -1px -1px 0px rgba(0,0,0,.2);
+    box-shadow: inset -1px -1px 0px rgba(0,0,0,.2);
+}
+
+.assessmentbubble:before {
+    content: "";
+    width: 0;
+    height: 0;
+    font-size: 0;
+    position: relative; /* 定位，也可以使用 absolute，看具体定位需求 */
+    border: 10px solid transparent; /* 箭头大小 */
+    border-bottom-color: #ffe7e7; /* 箭头颜色 */
+    border-top: 0; /* 箭头指向相对应的 border 为 0 */
+    overflow: hidden;
+    top: -10px;
+    left: 25px;
+    display: block;
+}
+
+.commentbubble{
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    background: #ecf7ff; 
+    
+    -webkit-box-shadow: inset -1px -1px 0px rgba(0,0,0,.2);
+    -moz-box-shadow: inset -1px -1px 0px rgba(0,0,0,.2);
+    box-shadow: inset -1px -1px 0px rgba(0,0,0,.2);
+}
+
+.commentbubble:before {
+    content: "";
+    width: 0;
+    height: 0;
+    font-size: 0;
+    position: relative; /* 定位，也可以使用 absolute，看具体定位需求 */
+    border: 10px solid transparent; /* 箭头大小 */
+    border-bottom-color: #ecf7ff; /* 箭头颜色 */
+    border-top: 0; /* 箭头指向相对应的 border 为 0 */
+    overflow: hidden;
+    top: -10px;
+    left: 110px;
+    display: block;
+}
+
+.chartbubble{
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    background: #F5F4F4; 
+    
+    -webkit-box-shadow: inset -1px -1px 0px rgba(0,0,0,.2);
+    -moz-box-shadow: inset -1px -1px 0px rgba(0,0,0,.2);
+    box-shadow: inset -1px -1px 0px rgba(0,0,0,.2);
+}
+
+.chartbubble:before {
+    content: "";
+    width: 0;
+    height: 0;
+    font-size: 0;
+    position: relative; /* 定位，也可以使用 absolute，看具体定位需求 */
+    border: 10px solid transparent; /* 箭头大小 */
+    border-bottom-color: #F5F4F4; /* 箭头颜色 */
+    border-top: 0; /* 箭头指向相对应的 border 为 0 */
+    overflow: hidden;
+    top: -10px;
+    left: 175px;
+    display: block;
+}
+
+.scorebubble{
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    background: #e6e6ff; 
+    
+    -webkit-box-shadow: inset -1px -1px 0px rgba(0,0,0,.2);
+    -moz-box-shadow: inset -1px -1px 0px rgba(0,0,0,.2);
+    box-shadow: inset -1px -1px 0px rgba(0,0,0,.2);
+}
+
+.scorebubble:before {
+    content: "";
+    width: 0;
+    height: 0;
+    font-size: 0;
+    position: relative; /* 定位，也可以使用 absolute，看具体定位需求 */
+    border: 10px solid transparent; /* 箭头大小 */
+    border-bottom-color:  #e6e6ff; /* 箭头颜色 */
+    border-top: 0; /* 箭头指向相对应的 border 为 0 */
+    overflow: hidden;
+    top: -10px;
+    left: 220px;
+    display: block;
+}
+
+.additionalbubble{
+    margin-top: 20px;
+    
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    background: #e6e6ff; 
+    
+    -webkit-box-shadow: inset -1px -1px 0px rgba(0,0,0,.2);
+    -moz-box-shadow: inset -1px -1px 0px rgba(0,0,0,.2);
+    box-shadow: inset -1px -1px 0px rgba(0,0,0,.2);
+}
+
+.additionalbubble:before{
+    content: "";
+    width: 0;
+    height: 0;
+    font-size: 0;
+    position: relative; /* 定位，也可以使用 absolute，看具体定位需求 */
+    border: 10px solid transparent; /* 箭头大小 */
+    border-bottom-color: #e6e6ff; /* 箭头颜色 */
+    border-top: 0; /* 箭头指向相对应的 border 为 0 */
+    overflow: hidden;
+    top: -10px;
+    left: 25px;
+    display: block;
+}
+
+.confidential-msg{
+    float: left; 
+    margin-top: 10px;
+    font-size: 14px; 
+    color: red;
+    font-weight: 600;
+}

@@ -1,0 +1,11 @@
+name = Bills Ticket
+description = Bills Ticket Management Module.
+core = 7.x
+
+package = Bills Management
+
+version = "7.x-1.0"
+core = "7.x"
+project = "bills_ticket"
+datestamp = "1386406401"
+

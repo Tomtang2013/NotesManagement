@@ -1,0 +1,67 @@
+name = Bills Management 
+description = Bills Management  is a Drupal 7 theme.
+core = 7.x
+engine = phptemplate
+stylesheets[all][] = fontsGoogleapis.css
+stylesheets[all][] = style.css
+stylesheets[all][] = css/performancereview.css
+
+scripts[] = js/superfish.js
+scripts[] = js/supersubs.js
+scripts[] = js/sfmenu.js
+scripts[] = js/jquery-1.7.2.min.js
+scripts[] = js/jquery-ui-1.8.min.js
+scripts[] = js/jquery.colorbox.js
+scripts[] = js/expandableTree.js
+
+
+
+regions[sidebar_first]  = First Sidebar
+regions[header]         = Header
+regions[homequotes]     = Home Quotes
+regions[home_high1]     = Home Highlight 1
+regions[home_high2]     = Home Highlight 2
+regions[home_high3]     = Home Highlight 3
+regions[content]        = Content
+regions[content_top]    = Content Top
+regions[help]           = Help
+regions[footer_first]   = First Bottom
+regions[footer_second]  = Second Bottom
+regions[footer_third]   = Third Bottom
+regions[footer_fourth]  = Fourth Bottom
+regions[footer]         = Footer
+
+regions[user_login] = User Login
+regions[slide_image] = Slide Image
+regions[dashboard_nav] = Dashboard Navigation
+regions[dashboard_content] = Dashboard Content
+regions[new_review] = Create New Review
+regions[mail_tpl_configure] = Configure Mail Template
+
+
+regions[my_woking_stage] = My Woking Stage   
+regions[my_woking_stage_select_feedback_provider] = My Woking Stage Select Feedback Provider
+regions[select_review_participant] = Select Review Participant
+regions[summary_feedback] = Summary Feedback
+regions[self_assessment] = Self Assessment
+
+
+features[] = logo
+features[] = name
+features[] = slogan
+features[] = node_user_picture
+features[] = comment_user_picture
+features[] = comment_user_verification
+features[] = favicon
+features[] = main_menu
+features[] = secondary_menu
+settings[footer_copyright]   = 1
+settings[footer_credits]   = 1
+settings[slideshow_display]  = 1
+settings[breadcrumbs]  = 1
+settings[slide1_desc]  = "What We Do"
+settings[slide2_desc]  = "Who We Are"
+settings[slide3_desc]  = "Our Service"
+settings[slide1_url]  = "node/1"
+settings[slide2_url]  = "node/2"
+settings[slide3_url]  = "node/3"

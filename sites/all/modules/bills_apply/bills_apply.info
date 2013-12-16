@@ -1,0 +1,10 @@
+name = Bills Apply
+description = Bills Apply Management Module.
+core = 7.x
+
+package = Bills Management
+
+version = "7.x-1.0"
+core = "7.x"
+project = "bills_apply"
+datestamp = "1386406401"
