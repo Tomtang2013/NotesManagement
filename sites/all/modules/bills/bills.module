@@ -1,0 +1,172 @@
+<?php
+
+// $Id: bills.info,v 1.4 2011/07/04 13:25:57 dries Exp $
+
+/**
+ * Implementation of hook_init
+ */
+function bills_init() {
+}
+
+/**
+ * Implements hook_help().
+ */
+function bills_help($path, $arg) {
+    switch ($path) {
+        case 'admin/help#bills':
+            $output = '<h3>' . t('About') . '</h3>';
+            $output .= '<p>' . t('票据管理');
+            return $output;
+    }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function bills_permission() {
+    return array(
+        'bills' => array(
+            'title' => t('票据管理'),
+        ),
+    );
+}
+
+function bills_menu() {
+    $items = array();
+    $items['bills'] = array(
+        'title' => t('票据管理'),
+        'page callback' => 'bill_status_page_call_back',
+        'page arguments' => array('bills'),
+        'access arguments' => array('bills'),
+        'weight' => 10,
+    );
+    return $items;
+}
+
+function bill_status_page_call_back() {
+  $header = array(
+        array('data' => t('票据编号'), 'field' => 'b.billsno'),
+        array('data' => t('票据类型'), 'field' => 'b.type'),
+        array('data' => t('票据状态'), 'field' => 'b.status'),
+        array('data' => t('票据金额'), 'field' => 'b.amount'),
+//        array('data' => t('入库时间'), 'field' => 'b.createdate'),
+//        array('data' => t('最后更新时间'), 'field' => 'b.lastupdate'),
+    );
+
+  $query = db_select('bills', 'b')
+    ->extend('PagerDefault');
+
+   $fields = array('billsno', 'type', 'status','amount');
+   
+  $query->fields('b',$fields);
+  $result = $query
+   ->limit(10)
+   ->orderBy('b.billsno')
+   ->execute();
+
+  $rows = array();
+  foreach ($result as $row) {
+    $rows[] = array('data' => (array) $row);
+  }
+  
+  $build['tablesort_table'] = array(
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $rows,
+  );
+
+  $build['pager_pager'] = array('#theme' => 'pager');
+
+  $pagecontent =  drupal_render($build);
+  $pagecontent .= "<hr>";
+  $pagecontent .= drupal_render(drupal_get_form("bills_create_form"));
+
+  return $pagecontent;
+}
+
+function bills_create_form($form, &$form_state) {
+  $form['description'] = array(
+    '#type' => 'item',
+    '#title' => t("票据录入"),
+  );
+  // This is the first form element. It's a textfield with a label, "Name"
+  $form['billsno_start'] = array(
+        '#type' => 'textfield',
+        '#size' => '10',
+        '#maxlength' => '10',
+        '#title' => t('起始票据编号'),
+    );
+
+    $form['billsno_end'] = array(
+        '#type' => 'textfield',
+        '#size' => '10',
+        '#maxlength' => '10',
+        '#title' => t('结束票据编号'),
+    );
+
+//    $form['billsno_status'] = array(
+//        '#type' => 'select',
+//        '#size' => '10',
+//        '#maxlength' => '10',
+//        '#title' => t('票据状态'),
+//    );
+
+    $form['billsno_type'] = array(
+        '#type' => 'textfield',
+        '#size' => '10',
+        '#maxlength' => '10',
+        '#title' => t('票据类型'),
+    );
+
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => '提交',
+    );
+    return $form;
+}
+
+function bills_create_form_validate($form, &$form_state) {
+    $start = $form_state['values']['billsno_start'] + 0;
+    $end = $form_state['values']['billsno_end'] + 0;
+
+    if (!is_int($start))
+        form_set_error('billsno_start', t('起始票据编号必须是数字.'));
+    if (!is_int($end))
+        form_set_error('billsno_end', t('结束票据编号必须是数字.'));
+    if ($start > $end) {
+        form_set_error('billsno_end', t('结束票据编号不能小于起始票据编号。'));
+    }
+}
+
+function bills_create_form_submit($form, &$form_state) {
+    $start = $form_state['values']['billsno_start'] + 0;
+    $end = $form_state['values']['billsno_end'] + 0;
+    $type = $form_state['values']['billsno_type'];
+    $amount = 0;
+    $values = array();
+    for($i=$start;$i<$end;$i++){
+        $values[] = array(
+            'billsno' => $i,
+            'type' => $type,
+            'status' => '可用',
+            'amount' => 0,
+            'createdate' => time(),
+            'lastupdate' => time(),
+            );
+    }
+    $fields = array('billsno', 'type', 'status','amount','createdate','lastupdate');
+
+    $query = db_insert('bills')->fields($fields);
+    foreach ($values as $record) {
+        $query->values($record);
+    }
+    
+    try{
+        $result = $query->execute();
+        drupal_set_message(t("票据录入成功"));
+    } catch(Exception $e){
+        drupal_set_message('票据录入失败，请联系管理员', 'error');
+    }
+    
+    
+}

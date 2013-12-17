@@ -1,0 +1,10 @@
+name = Bills
+description = Bills Management Module(Input, Status manage, update, delete).
+core = 7.x
+
+package = Bills Management
+
+version = "7.x-1.0"
+core = "7.x"
+project = "bills"
+datestamp = "1386406401"

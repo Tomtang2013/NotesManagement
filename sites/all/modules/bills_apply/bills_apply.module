@@ -54,5 +54,10 @@ function bills_apply($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('Name'),
   );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('提交'),
+  );
   return $form;
 }
