@@ -4,7 +4,7 @@ core = 7.x
 engine = phptemplate
 stylesheets[all][] = fontsGoogleapis.css
 stylesheets[all][] = style.css
-stylesheets[all][] = css/performancereview.css
+stylesheets[all][] = css/billsmanagement.css
 
 scripts[] = js/superfish.js
 scripts[] = js/supersubs.js

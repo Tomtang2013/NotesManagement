@@ -64,31 +64,6 @@
  * @see template_process()
  */
 ?>
-
-<script type="text/javascript">
-//    jQuery( document ).ready(function() {
-//        jQuery('.add-field-button').click(click_function);
-//    });
-//
-//    function click_function(){
-//            jQuery(this).next().clone().appendTo(jQuery(this).parent());
-//            var form_id = jQuery('[name="form_id"]').val();
-//            var base_path = jQuery('#base_path').val();
-//            var url = base_path + "node/webform/"+ form_id +"/addField";
-//            var nid = jQuery('#nid').val();
-//            var data = {nid:nid};
-//            jQuery.post(url,data,function(rsp){
-//                 jQuery('#webform-client-form-'+nid).html(rsp);
-//                 jQuery('.add-field-button').click(click_function);
-//            }, "html");
-//            return false;
-//    }
-//<input type="hidden" value="<?php print base_path();?>" id="base_path"/>
-//<input type="hidden" value="<?php
-//    if($node = menu_get_object())
-//        print $node->nid;
-?>//" id="nid"/
-</script>
 <div id="wrap" style="padding-top: 20px;">
 <?php if ($title): ?><h1 class="page-title"><?php print $title; ?></h1><?php endif; ?>
 <?php print $messages; ?>

@@ -1,0 +1,58 @@
+<?php
+
+// $Id: bills_audit.info,v 1.4 2011/07/04 13:25:57 dries Exp $
+
+/**
+ * Implementation of hook_init
+ */
+function bills_audit_init() {
+}
+
+/**
+ * Implements hook_help().
+ */
+function bills_audit_help($path, $arg) {
+    switch ($path) {
+        case 'admin/help#bills_audit':
+            $output = '<h3>' . t('About') . '</h3>';
+            $output .= '<p>' . t('票据审核');
+            return $output;
+    }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function bills_audit_permission() {
+    return array(
+        'bills_audit' => array(
+            'title' => t('票据审核'),
+        ),
+    );
+}
+
+function bills_audit_menu() {
+    $items = array();
+    $items['billsaudit'] = array(
+        'title' => t('票据审核'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('bills_audit'),
+        'access arguments' => array('bills_audit'),
+        'weight' => 20,
+    );
+    return $items;
+}
+
+function bills_audit($form, &$form_state) {
+
+  $form['description'] = array(
+    '#type' => 'item',
+    '#title' => t("票据审核"),
+  );
+  // This is the first form element. It's a textfield with a label, "Name"
+  $form['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name'),
+  );
+  return $form;
+}

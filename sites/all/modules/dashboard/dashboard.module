@@ -1,0 +1,48 @@
+<?php
+
+// $Id: dashboard.info,v 1.4 2011/07/04 13:25:57 dries Exp $
+
+/**
+ * Implementation of hook_init
+ */
+function dashboard_init() {
+}
+
+/**
+ * Implements hook_help().
+ */
+function dashboard_help($path, $arg) {
+    switch ($path) {
+        case 'admin/help#dashboard':
+            $output = '<h3>' . t('About') . '</h3>';
+            $output .= '<p>' . t('主页模块');
+            return $output;
+    }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function dashboard_permission() {
+    return array(
+        'dashboard' => array(
+            'title' => t('主页'),
+        ),
+    );
+}
+
+function dashboard_menu() {
+    $items = array();
+    $items['dashboard'] = array(
+        'title' => t('主页'),
+        'page callback' => 'dashboard_call_back',
+        'access arguments' => array('dashboard'),
+        'weight' => -47,
+    );
+    return $items;
+}
+
+function dashboard_call_back() {
+    $pageContent = '';
+    return $pageContent;
+}

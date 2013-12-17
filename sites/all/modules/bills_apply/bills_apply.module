@@ -1,1 +1,58 @@
 <?php
+
+// $Id: bills_apply.info,v 1.4 2011/07/04 13:25:57 dries Exp $
+
+/**
+ * Implementation of hook_init
+ */
+function bills_apply_init() {
+}
+
+/**
+ * Implements hook_help().
+ */
+function bills_apply_help($path, $arg) {
+    switch ($path) {
+        case 'admin/help#bills_apply':
+            $output = '<h3>' . t('About') . '</h3>';
+            $output .= '<p>' . t('票据申请');
+            return $output;
+    }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function bills_apply_permission() {
+    return array(
+        'bills_apply' => array(
+            'title' => t('票据申请'),
+        ),
+    );
+}
+
+function bills_apply_menu() {
+    $items = array();
+    $items['billsapply'] = array(
+        'title' => t('票据申请'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('bills_apply'),
+        'access arguments' => array('bills_apply'),
+        'weight' => 10,
+    );
+    return $items;
+}
+
+function bills_apply($form, &$form_state) {
+
+  $form['description'] = array(
+    '#type' => 'item',
+    '#title' => t("票据申请"),
+  );
+  // This is the first form element. It's a textfield with a label, "Name"
+  $form['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name'),
+  );
+  return $form;
+}

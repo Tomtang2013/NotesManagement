@@ -111,5 +111,5 @@ function performancereview_preprocess_node(&$variables) {
  * Add javascript files for front-page jquery slideshow.
  */
 //if (drupal_is_front_page()) {
-  drupal_add_js(drupal_get_path('theme', 'performancereview') . '/js/sliding_effect.js');
+//  drupal_add_js(drupal_get_path('theme', 'performancereview') . '/js/sliding_effect.js');
 //}

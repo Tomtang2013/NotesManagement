@@ -1,0 +1,58 @@
+<?php
+
+// $Id: bills_ticket.info,v 1.4 2011/07/04 13:25:57 dries Exp $
+
+/**
+ * Implementation of hook_init
+ */
+function bills_ticket_init() {
+}
+
+/**
+ * Implements hook_help().
+ */
+function bills_ticket_help($path, $arg) {
+    switch ($path) {
+        case 'admin/help#bills_ticket':
+            $output = '<h3>' . t('About') . '</h3>';
+            $output .= '<p>' . t('开票');
+            return $output;
+    }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function bills_ticket_permission() {
+    return array(
+        'bills_ticket' => array(
+            'title' => t('开票'),
+        ),
+    );
+}
+
+function bills_ticket_menu() {
+    $items = array();
+    $items['billsticket'] = array(
+        'title' => t('开票'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('bills_ticket'),
+        'access arguments' => array('bills_ticket'),
+        'weight' => 30,
+    );
+    return $items;
+}
+
+function bills_ticket($form, &$form_state) {
+
+  $form['description'] = array(
+    '#type' => 'item',
+    '#title' => t("开票"),
+  );
+  // This is the first form element. It's a textfield with a label, "Name"
+  $form['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name'),
+  );
+  return $form;
+}
