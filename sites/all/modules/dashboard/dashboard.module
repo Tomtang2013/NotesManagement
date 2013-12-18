@@ -38,6 +38,7 @@ function dashboard_menu() {
         'page callback' => 'dashboard_call_back',
         'access arguments' => array('dashboard'),
         'weight' => -47,
+        'type' => MENU_CALLBACK,
     );
     return $items;
 }

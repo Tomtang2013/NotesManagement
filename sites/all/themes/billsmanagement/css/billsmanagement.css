@@ -281,3 +281,11 @@ div.block_im_subject label {
 .pr_content_right{
     padding:10px 10px 10px 10px;
 }
+
+.active{
+    background-color:transparent!important;
+}
+
+table .odd{
+    background-color: #fff;
+}

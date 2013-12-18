@@ -49,7 +49,7 @@ function bills_apply_menu() {
     );
     return $items;
 }
-function bills_apply($form, &$form_state) {
+function bills_apply() {
     return theme('bills_apply');
 }
 
@@ -62,10 +62,113 @@ function bills_apply_theme() {
 }
 
 function bills_apply_submit(){
+    
     $unit = $_POST['unit'];
     $amount = $_POST['amount'];
     $alloc_data = $_POST['alloc_data'];
-    dd($unit);
-    dd($amount);
-    dd($alloc_data);
+    
+    $status = FALSE;
+    $status = bills_apply_submit_validate($unit,$amount,$alloc_data);
+
+    if($status){
+        global $user;
+        $status = insert_bills_apply($user,$unit,$amount,$alloc_data);
+        if ($status) {
+            drupal_set_message(t("票据申请成功"),'status');
+        } else {
+            drupal_set_message(t("票据申请失败，请联系管理员"),'error');
+        }
+    }
+     global $base_path;
+    echo $base_path.'billsapply';
+}
+
+function bills_apply_submit_validate($unit,$amount,$alloc_data){
+    $status = TRUE;
+    if(empty($unit) || $unit == ''){
+        drupal_set_message(t("往来单位不能为空"),'error');
+        $status = FALSE;
+    }
+    
+    if(empty($amount)){
+        drupal_set_message(t("金额不能为空"),'error');
+        $status = FALSE;
+    } else {
+        $amount = $amount + 0;
+        if ($amount<=0){
+            drupal_set_message(t("金额必须为数字且大于0"),'error');
+            $status = FALSE;
+        }
+    }
+    
+    $num = 0;
+    if($alloc_data == 'noData'){
+         drupal_set_message(t("请输入开票用途"),'error');
+         $status = FALSE;
+    } else{
+         foreach(  $alloc_data as $alloc_item){
+            $num = $alloc_item[1]+0;
+            if ($num<=0){
+                drupal_set_message(t("票据数量必须大于0的整数"),'error');
+                $status = FALSE;
+            }
+        }
+    }
+    return $status;
+}
+
+function insert_bills_apply($user,$unit,$amount,$alloc_data){
+    $status = FALSE;
+    $values[] = array(
+            'apply_uid' => $user->uid,
+            'unit' => $unit,
+            'date' => time(),
+            'amount' => $amount,
+            'bills_number' => get_bills_total_number($alloc_data)
+        );
+    $fields = array('apply_uid', 'unit', 'date', 'amount', 'bills_number');
+    $query = db_insert('bills_apply')->fields($fields)->values($values);
+    $result = $query->execute();
+
+    if($result>0){
+        $status = insert_bills_alloc($result,$alloc_data);
+    }
+
+    return $status;
+}
+
+function get_bills_total_number($alloc_data){
+    $total_number = 0;
+    foreach(  $alloc_data as $alloc_item){
+        $total_number += $alloc_item[1];
+    }
+    return $total_number;
+}
+
+function perpare_bills_alloc($apply_id,$alloc_data){
+    $alloc = new stdClass();
+    $alloc->rows = array();
+    foreach(  $alloc_data as $alloc_item){
+        $alloc->rows[] = array(
+            'apply_id' => $apply_id,
+            'bills_alloc_use' => $alloc_item[0],
+            'bills_number' => $alloc_item[1]
+        );
+    }
+    return $alloc;
+}
+
+function insert_bills_alloc($apply_id,$alloc_data){
+    $fields_alloc = array('apply_id', 'bills_alloc_use', 'bills_number');
+    $query_alloc = db_insert('bills_allocation')->fields($fields_alloc);
+    $alloc = perpare_bills_alloc($apply_id,$alloc_data);
+    foreach ($alloc->rows as $record) {
+        $query_alloc->values($record);
+    }
+    try {
+        $query_alloc->execute();
+        return TRUE;
+    } catch (Exception $e) {
+        return FALSE;
+    }
 }

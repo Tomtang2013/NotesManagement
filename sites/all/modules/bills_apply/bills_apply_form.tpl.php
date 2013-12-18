@@ -1,6 +1,7 @@
 <?php
     global $base_path;
     $ajax_url = $base_path.'billsapplysubmit';
+    $messages = drupal_get_messages();
 ?>
 
 <script type="text/javascript">
@@ -13,10 +14,10 @@
             'transitionOut'		: 'none'
         });
 
-        jQuery('#add_allco_submit').click(function(){
+        jQuery('#add_alloc_submit').click(function(){
             var number = jQuery('#number').val();
             var usefor = jQuery('#usefor').val();
-            jQuery('#bill_apply_form_alloc').append('<div class="allco_row"><div class="alloc_item alloc_usefor">'+usefor+'</div>\n\
+            jQuery('#bill_apply_form_alloc').append('<div class="alloc_row"><div class="alloc_item alloc_usefor">'+usefor+'</div>\n\
             <div class="alloc_item alloc_number">'+number+'</div>\n\
             <div class="alloc_action_item">\n\
                 <a id="add_alloc" href="#" onclick="remove_item(this)" class="form-submit">删除</a>\n\
@@ -32,18 +33,19 @@
             var alloc_data = prepare_alloc_data();
 //            console.log(unit);
 //            console.log(amount);
-//            console.log(alloc_data);
+//            console.log();
+            if(alloc_data.length ==0) alloc_data = 'noData';
             var url = '<?php print $ajax_url;?>';
             var data = { 'unit': unit,'amount': amount,'alloc_data': alloc_data };
             $.post( url,data, function( respo ) {
-               alert(respo);
+                location.reload();
             });
         });
     });
 
     function prepare_alloc_data(){
         var data = new Array();
-        jQuery('#bill_apply_form_alloc .allco_row').each( function(){
+        jQuery('#bill_apply_form_alloc .alloc_row').each( function(){
             var alloc = new Array();
             var usefor = jQuery(this).find('.alloc_usefor').text();
             var mumber = jQuery(this).find('.alloc_number').text();
@@ -59,6 +61,17 @@
     }
 
 </script>
+<?php if ($messages): ?>
+    <?php foreach ($messages as $status => $msgs): ?>
+            <div class="messages <?php print $status ?>">
+                <ul>
+            <?php foreach ($msgs as $msg): ?>
+                <li><?php print $msg ?></li>
+            <?php endforeach; ?>
+            </ul>
+        </div>
+    <?php endforeach; ?>
+<?php endif; ?>
 
 <div id="bills_apply_form">
     <div id="edit-description" class="" >
@@ -82,12 +95,12 @@
             <span ><strong>往来单位:</strong> </span>
             <input type="text" id="unit" value="" size="20" maxlength="10" class="form-text">
         </div>
-        <div style="float:left;">
+        <div style="float:left;padding-left: 50px;">
             <span ><strong>金额:</strong> </span>
             <input type="text" id="amount" value="" size="20" maxlength="10" class="form-text">
         </div>
     </div>
-    <input type="button" style="clear:both;"
+    <input type="button" style="clear:both;margin-left: 40px;"
        id="bills_apply_submit" name="op" value="提交" class="form-submit">
 </div>
 
@@ -97,15 +110,15 @@
     <div id="fancy_box_use_div" style="width:270px;height:200px;" >
         <h2 ><strong>追加用途</strong></h2>
         <div >
-            <label for="usefor">用途 </label>
+            <label for="usefor"> 用途: </label>
             <input type="text" id="usefor" value="" size="40" maxlength="10" class="form-text">
         </div>
         <div>
-            <label for="unit">数量 </label>
+            <label for="unit"> 数量: </label>
             <input type="text" id="number" value="" size="40" maxlength="10" class="form-text">
         </div>
         <div style="float:right;padding-top: 10px;">
-            <input  type="button" style="" id="add_allco_submit" name="op"
+            <input  type="button" style="" id="add_alloc_submit" name="op"
                     value="增加" class="form-submit">
         </div>
     </div>

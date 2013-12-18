@@ -7,12 +7,14 @@ stylesheets[all][] = style.css
 stylesheets[all][] = css/billsmanagement.css
 
 scripts[] = js/jquery-1.7.2.min.js
+
 stylesheets[all][] = js/fancybox/jquery.fancybox-1.3.4.css
 
 scripts[] = js/fancybox/jquery.mousewheel-3.0.4.pack.js
 scripts[] = js/fancybox/jquery.fancybox-1.3.4.js
 
-scripts[] = js/jquery-ui-1.8.min.js
+;stylesheets[all][] = css/jquery-ui.css
+;scripts[] = js/jquery-ui-1.8.min.js
 
 
 regions[sidebar_first]  = First Sidebar

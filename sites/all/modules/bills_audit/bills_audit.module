@@ -35,24 +35,123 @@ function bills_audit_menu() {
     $items = array();
     $items['billsaudit'] = array(
         'title' => t('票据审核'),
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('bills_audit'),
+        'page callback' => 'bill_audit_status_call_back',
         'access arguments' => array('bills_audit'),
         'weight' => 20,
+    );
+
+    $items['billsauditsubmit/%/%'] = array(
+        'page callback' => 'bills_audit_submit',
+        'page arguments' => array(1,2),
+        'access arguments' => array('bills_audit'),
+        'type' => MENU_CALLBACK,
+    );
+
+    $items['billsauditalloc/%'] = array(
+        'page callback' => 'bills_audit_alloc',
+        'page arguments' => array(1),
+        'access arguments' => array('bills_audit'),
+        'type' => MENU_CALLBACK,
     );
     return $items;
 }
 
-function bills_audit($form, &$form_state) {
+function bill_audit_status_call_back(){
+    $header = array(
+        array('data' => t('往来单位')),
+        array('data' => t('申请状态')),
+        array('data' => t('票据金额(元)')),
+        array('data' => t('票据数量')),
+        array('data' => t('申请时间')),
+        array('data' => t('票据分配')),
+    );
 
-  $form['description'] = array(
-    '#type' => 'item',
-    '#title' => t("票据审核"),
-  );
-  // This is the first form element. It's a textfield with a label, "Name"
-  $form['name'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Name'),
-  );
-  return $form;
+    $query = db_select('bills_apply', 'ba')
+                    ->extend('PagerDefault');
+
+    $fields = array('unit', 'status','amount', 'bills_number','date','apply_id');
+
+    $query->fields('ba', $fields);
+    $result = $query
+        ->limit(10)
+        ->orderBy('ba.unit')
+        ->execute();
+
+    $rows = array();
+    foreach ($result as $row) {
+        $row->date = gmdate("Y-m-d", $row->date);
+        $row->apply_id = l('详细','billsauditalloc/'. $row->apply_id, array('attributes'=>array('class'=>'audit_operating')));
+        $rows[] = array('data' => (array) $row);
+    }
+
+    $build['PagerDefault'] = array(
+        '#theme' => 'table',
+        '#header' => $header,
+        '#rows' => $rows,
+    );
+
+    $build['pager_pager'] = array('#theme' => 'pager');
+
+    $pagecontent = "<h1><strong>票据审核</strong></h1>";
+    $pagecontent .= drupal_render($build);
+    $pagecontent .= theme('bills_audit');
+
+    return $pagecontent;
+}
+
+function bills_audit_submit($apply_id,$operator){
+    $opt = $operator =="approve" ? "批准" :"拒绝";
+    db_update('bills_apply')
+             ->fields(array('status' => $opt))
+             ->condition('apply_id', $apply_id)
+             ->execute();
+}
+
+function bills_audit_alloc($apply_id){
+    $header = array(
+        array('data' => t('用途')),
+        array('data' => t('数量')),
+    );
+
+    $query = db_select('bills_allocation', 'balloc')
+                    ->extend('PagerDefault');
+
+    $fields = array('bills_alloc_use', 'bills_number');
+
+    $query->fields('balloc', $fields);
+    $result = $query
+        ->condition('balloc.apply_id',$apply_id,'=')
+        ->orderBy('balloc.bills_alloc_use')
+        ->execute();
+
+    $rows = array();
+    foreach ($result as $row) {
+        $rows[] = array('data' => (array) $row);
+    }
+
+    $build['tablesort_table'] = array(
+        '#theme' => 'table',
+        '#header' => $header,
+        '#rows' => $rows,
+    );
+
+    $build['pager_pager'] = array('#theme' => 'pager');
+
+    $pagecontent = "<h1><strong>申请详细</strong></h1>";
+    $pagecontent .= drupal_render($build);
+
+    $pagecontent .= '<div><input type="button" style="clear:both;"
+       id="bills_approve" name="op" value="批准" class="form-submit"></input>';
+    $pagecontent .= '<input type="button" style="clear:both;"
+       id="bills_disapprove" name="op" value="拒绝" class="form-submit"></input>';
+    $pagecontent .= '<input type="hidden" name="apply_id" value="'.$apply_id.'" id="apply_id"></input></div>';
+    echo $pagecontent;
+}
+
+function bills_audit_theme() {
+    return array(
+        'bills_audit' => array(
+            'template' => 'bills_audit',
+        ),
+    );
 }

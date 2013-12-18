@@ -94,6 +94,7 @@ function bills_create_form($form, &$form_state) {
     $form['billsno_start'] = array(
         '#type' => 'textfield',
         '#size' => '20',
+        '#required' => TRUE,
         '#maxlength' => '10',
         '#title' => t('起始票据编号'),
     );
@@ -101,6 +102,7 @@ function bills_create_form($form, &$form_state) {
     $form['billsno_end'] = array(
         '#type' => 'textfield',
         '#size' => '20',
+        '#required' => TRUE,
         '#maxlength' => '10',
         '#title' => t('结束票据编号'),
     );
@@ -115,6 +117,7 @@ function bills_create_form($form, &$form_state) {
     $form['billsno_type'] = array(
         '#type' => 'textfield',
         '#size' => '10',
+        '#required' => TRUE,
         '#maxlength' => '10',
         '#title' => t('票据类型'),
     );
