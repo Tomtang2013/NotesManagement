@@ -6,6 +6,7 @@
  * Implementation of hook_init
  */
 function bills_init() {
+
 }
 
 /**
@@ -38,13 +39,13 @@ function bills_menu() {
         'page callback' => 'bill_status_page_call_back',
         'page arguments' => array('bills'),
         'access arguments' => array('bills'),
-        'weight' => 10,
+        'weight' => 0,
     );
     return $items;
 }
 
 function bill_status_page_call_back() {
-  $header = array(
+    $header = array(
         array('data' => t('票据编号'), 'field' => 'b.billsno'),
         array('data' => t('票据类型'), 'field' => 'b.type'),
         array('data' => t('票据状态'), 'field' => 'b.status'),
@@ -53,53 +54,53 @@ function bill_status_page_call_back() {
 //        array('data' => t('最后更新时间'), 'field' => 'b.lastupdate'),
     );
 
-  $query = db_select('bills', 'b')
-    ->extend('PagerDefault');
+    $query = db_select('bills', 'b')
+                    ->extend('PagerDefault');
 
-   $fields = array('billsno', 'type', 'status','amount');
-   
-  $query->fields('b',$fields);
-  $result = $query
-   ->limit(10)
-   ->orderBy('b.billsno')
-   ->execute();
+    $fields = array('billsno', 'type', 'status', 'amount');
 
-  $rows = array();
-  foreach ($result as $row) {
-    $rows[] = array('data' => (array) $row);
-  }
-  
-  $build['tablesort_table'] = array(
-    '#theme' => 'table',
-    '#header' => $header,
-    '#rows' => $rows,
-  );
+    $query->fields('b', $fields);
+    $result = $query
+                    ->limit(10)
+                    ->orderBy('b.billsno')
+                    ->execute();
 
-  $build['pager_pager'] = array('#theme' => 'pager');
+    $rows = array();
+    foreach ($result as $row) {
+        $rows[] = array('data' => (array) $row);
+    }
 
-  $pagecontent =  drupal_render($build);
-  $pagecontent .= "<hr>";
-  $pagecontent .= drupal_render(drupal_get_form("bills_create_form"));
+    $build['tablesort_table'] = array(
+        '#theme' => 'table',
+        '#header' => $header,
+        '#rows' => $rows,
+    );
 
-  return $pagecontent;
+    $build['pager_pager'] = array('#theme' => 'pager');
+
+    $pagecontent = drupal_render($build);
+    $pagecontent .= "<hr>";
+    $pagecontent .= drupal_render(drupal_get_form("bills_create_form"));
+
+    return $pagecontent;
 }
 
 function bills_create_form($form, &$form_state) {
-  $form['description'] = array(
-    '#type' => 'item',
-    '#title' => t("票据录入"),
-  );
-  // This is the first form element. It's a textfield with a label, "Name"
-  $form['billsno_start'] = array(
+    $form['description'] = array(
+        '#type' => 'item',
+        '#title' => t("票据录入"),
+    );
+    // This is the first form element. It's a textfield with a label, "Name"
+    $form['billsno_start'] = array(
         '#type' => 'textfield',
-        '#size' => '10',
+        '#size' => '20',
         '#maxlength' => '10',
         '#title' => t('起始票据编号'),
     );
 
     $form['billsno_end'] = array(
         '#type' => 'textfield',
-        '#size' => '10',
+        '#size' => '20',
         '#maxlength' => '10',
         '#title' => t('结束票据编号'),
     );
@@ -144,7 +145,7 @@ function bills_create_form_submit($form, &$form_state) {
     $type = $form_state['values']['billsno_type'];
     $amount = 0;
     $values = array();
-    for($i=$start;$i<$end;$i++){
+    for ($i = $start; $i < $end; $i++) {
         $values[] = array(
             'billsno' => $i,
             'type' => $type,
@@ -152,21 +153,19 @@ function bills_create_form_submit($form, &$form_state) {
             'amount' => 0,
             'createdate' => time(),
             'lastupdate' => time(),
-            );
+        );
     }
-    $fields = array('billsno', 'type', 'status','amount','createdate','lastupdate');
+    $fields = array('billsno', 'type', 'status', 'amount', 'createdate', 'lastupdate');
 
     $query = db_insert('bills')->fields($fields);
     foreach ($values as $record) {
         $query->values($record);
     }
-    
-    try{
+
+    try {
         $result = $query->execute();
         drupal_set_message(t("票据录入成功"));
-    } catch(Exception $e){
+    } catch (Exception $e) {
         drupal_set_message('票据录入失败，请联系管理员', 'error');
     }
-    
-    
 }

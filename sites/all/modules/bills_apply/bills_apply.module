@@ -6,6 +6,7 @@
  * Implementation of hook_init
  */
 function bills_apply_init() {
+    drupal_add_css(drupal_get_path('module', 'bills_apply') . '/bills_apply.css', array('group' => CSS_DEFAULT, 'every_page' => FALSE));
 }
 
 /**
@@ -35,29 +36,36 @@ function bills_apply_menu() {
     $items = array();
     $items['billsapply'] = array(
         'title' => t('票据申请'),
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('bills_apply'),
+        'page callback' => 'bills_apply',
         'access arguments' => array('bills_apply'),
         'weight' => 10,
     );
+
+    $items['billsapplysubmit'] = array(
+        'title' => t('票据申请'),
+        'page callback' => 'bills_apply_submit',
+        'access arguments' => array('bills_apply'),
+        'type' => MENU_CALLBACK,
+    );
     return $items;
 }
-
 function bills_apply($form, &$form_state) {
+    return theme('bills_apply');
+}
 
-  $form['description'] = array(
-    '#type' => 'item',
-    '#title' => t("票据申请"),
-  );
-  // This is the first form element. It's a textfield with a label, "Name"
-  $form['name'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Name'),
-  );
+function bills_apply_theme() {
+    return array(
+        'bills_apply' => array(
+            'template' => 'bills_apply_form',
+        ),
+    );
+}
 
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('提交'),
-  );
-  return $form;
+function bills_apply_submit(){
+    $unit = $_POST['unit'];
+    $amount = $_POST['amount'];
+    $alloc_data = $_POST['alloc_data'];
+    dd($unit);
+    dd($amount);
+    dd($alloc_data);
 }
