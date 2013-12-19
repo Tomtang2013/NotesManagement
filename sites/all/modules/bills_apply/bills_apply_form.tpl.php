@@ -30,14 +30,12 @@
         jQuery('#bills_apply_submit').click(function(){
             var unit = jQuery('#unit').val();
             var amount = jQuery('#amount').val();
+            var bills_type =  jQuery('#bills_type').val();
             var alloc_data = prepare_alloc_data();
-//            console.log(unit);
-//            console.log(amount);
-//            console.log();
             if(alloc_data.length ==0) alloc_data = 'noData';
             var url = '<?php print $ajax_url;?>';
-            var data = { 'unit': unit,'amount': amount,'alloc_data': alloc_data };
-            $.post( url,data, function( respo ) {
+            var data = { 'unit': unit,'amount': amount,'bills_type':bills_type,'alloc_data': alloc_data };
+            jQuery.post( url,data, function( respo ) {
                 location.reload();
             });
         });
@@ -99,8 +97,17 @@
             <span ><strong>金额:</strong> </span>
             <input type="text" id="amount" value="" size="20" maxlength="10" class="form-text">
         </div>
+        <div style="float:left;clear:left;padding-top: 10px;">
+            <span ><strong>票据类型:</strong> </span>
+            <select id="bills_type" class="bills_type_select" >
+                <option value="NA">- 选择 -</option>
+                <option value="发票">发票</option>
+                <option value="地税">地税</option>
+                <option value="国税">国税</option>
+            </select>
+        </div>
     </div>
-    <input type="button" style="clear:both;margin-left: 40px;"
+    <input type="button" style="clear:both;margin-left: 40px; clear:left;"
        id="bills_apply_submit" name="op" value="提交" class="form-submit">
 </div>
 

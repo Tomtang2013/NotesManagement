@@ -47,3 +47,22 @@ function dashboard_call_back() {
     $pageContent = '';
     return $pageContent;
 }
+
+function message_display(){
+    $output = "";
+    $messages = drupal_get_messages();
+    if ($messages){
+        foreach ($messages as $status => $msgs){
+            $output .= "<div class='messages $status'>";
+            $output .= "    <ul>";
+             foreach ($msgs as $msg){
+                $output .= "    <li>";
+                $output .=          $msg;
+                $output .= "    </li>";
+             }
+            $output .= "    </ul>";
+            $output .= "</div>";
+        }
+    }
+        return $output;
+}

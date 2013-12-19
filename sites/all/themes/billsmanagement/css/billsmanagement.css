@@ -289,3 +289,31 @@ div.block_im_subject label {
 table .odd{
     background-color: #fff;
 }
+
+/****************************************************************/
+
+
+.bills_form_row{
+    width:100%;
+    padding:10px 10px 10px 0px;
+}
+
+.bills_form_row label{
+    display:inline-block;
+    margin-right: 20px;
+}
+.bills_form_row .availableno{
+    border:1px solid green;padding:10px;
+}
+.bills_form_row .unavailableno{
+    border:1px solid red;padding:10px;
+}
+
+.bills_type_select{
+    padding:8px;
+}
+/****************************************************************/
+.expanded{
+    display:none;
+}
+

@@ -79,7 +79,7 @@ function bill_status_page_call_back() {
     $build['pager_pager'] = array('#theme' => 'pager');
 
     $pagecontent = drupal_render($build);
-    $pagecontent .= "<hr>";
+    $pagecontent .= "<hr/>";
     $pagecontent .= drupal_render(drupal_get_form("bills_create_form"));
 
     return $pagecontent;
@@ -115,10 +115,11 @@ function bills_create_form($form, &$form_state) {
 //    );
 
     $form['billsno_type'] = array(
-        '#type' => 'textfield',
-        '#size' => '10',
+        '#type' => 'select',
         '#required' => TRUE,
-        '#maxlength' => '10',
+        '#options' => array('发票'=>'发票' ,
+                            '地税'=>'地税' ,
+                            '国税'=>'国税' ,),
         '#title' => t('票据类型'),
     );
 

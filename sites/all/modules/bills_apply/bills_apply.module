@@ -66,9 +66,9 @@ function bills_apply_submit(){
     $unit = $_POST['unit'];
     $amount = $_POST['amount'];
     $alloc_data = $_POST['alloc_data'];
-    
+    $bills_type =  $_POST['bills_type'];
     $status = FALSE;
-    $status = bills_apply_submit_validate($unit,$amount,$alloc_data);
+    $status = bills_apply_submit_validate($unit,$amount,$bills_type,$alloc_data);
 
     if($status){
         global $user;
@@ -83,7 +83,7 @@ function bills_apply_submit(){
     echo $base_path.'billsapply';
 }
 
-function bills_apply_submit_validate($unit,$amount,$alloc_data){
+function bills_apply_submit_validate($unit,$amount,$bills_type,$alloc_data){
     $status = TRUE;
     if(empty($unit) || $unit == ''){
         drupal_set_message(t("往来单位不能为空"),'error');
@@ -99,6 +99,11 @@ function bills_apply_submit_validate($unit,$amount,$alloc_data){
             drupal_set_message(t("金额必须为数字且大于0"),'error');
             $status = FALSE;
         }
+    }
+
+    if($bills_type == 'NA'){
+         drupal_set_message(t("请选择申请票据类型"),'error');
+         $status = FALSE;
     }
     
     $num = 0;
