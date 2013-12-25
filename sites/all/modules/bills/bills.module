@@ -36,15 +36,26 @@ function bills_menu() {
     $items = array();
     $items['bills'] = array(
         'title' => t('票据管理'),
-        'page callback' => 'bill_status_page_call_back',
+        'page callback' => 'bills_status_page_call_back',
         'access arguments' => array('bills'),
         'weight' => 0,
     );
-    
+
     $items['billsdistribution'] = array(
         'title' => t('票据分配'),
-        'page callback' => 'bill_distribution',
-        'access arguments' => array('bill_distribution'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('bills_distribution_form'),
+        'access arguments' => array('bills_distribution'),
+        'file' => 'bills_distribution.inc',
+        'weight' => 0,
+    );
+
+    $items['billssummary'] = array(
+        'title' => t('上级单位结报'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('bills_summary_form'),
+        'access arguments' => array('bills_summary'),
+        'file' => 'bills_summary.inc',
         'weight' => 0,
     );
 
@@ -52,7 +63,7 @@ function bills_menu() {
     return $items;
 }
 
-function bill_status_page_call_back() {
+function bills_status_page_call_back() {
     $pagecontent = drupal_render(bills_list());
     $pagecontent .= "<hr/>";
     $pagecontent .= drupal_render(drupal_get_form("bills_create_form"));
@@ -82,19 +93,12 @@ function bills_create_form($form, &$form_state) {
         '#title' => t('结束票据编号'),
     );
 
-//    $form['billsno_status'] = array(
-//        '#type' => 'select',
-//        '#size' => '10',
-//        '#maxlength' => '10',
-//        '#title' => t('票据状态'),
-//    );
-
     $form['billsno_type'] = array(
         '#type' => 'select',
         '#required' => TRUE,
-        '#options' => array('发票'=>'发票' ,
-                            '地税'=>'地税' ,
-                            '国税'=>'国税' ,),
+        '#options' => array('发票' => '发票',
+            '地税' => '地税',
+            '国税' => '国税',),
         '#title' => t('票据类型'),
     );
 
@@ -149,8 +153,8 @@ function bills_create_form_submit($form, &$form_state) {
     }
 }
 
-function bills_list($hasOpt = false){
-      $header = array(
+function bills_list($hasOpt = false) {
+    $header = array(
         array('data' => t('票据编号'), 'field' => 'b.billsno'),
         array('data' => t('票据类型'), 'field' => 'b.type'),
         array('data' => t('票据状态'), 'field' => 'b.status'),
@@ -162,10 +166,10 @@ function bills_list($hasOpt = false){
 
     $fields = array('billsno', 'type', 'status', 'amount');
 
-    if($hasOpt){
-       $header[] = array('data' => t('操作'), 'field' => 'opt');
-     }
-     
+    if ($hasOpt) {
+        $header[] = array('data' => t('操作'), 'field' => 'opt');
+    }
+
     $query->fields('b', $fields);
     $result = $query
                     ->limit(10)
@@ -174,11 +178,10 @@ function bills_list($hasOpt = false){
 
     $rows = array();
     foreach ($result as $row) {
-        if($hasOpt){
-            $row->opt = l('选中','www.google.cn');
+        if ($hasOpt) {
+            $row->opt = l('选中', 'www.google.cn');
         }
         $rows[] = array('data' => (array) $row);
-       
     }
 
     $build['tablesort_table'] = array(
@@ -189,15 +192,4 @@ function bills_list($hasOpt = false){
 
     $build['pager_pager'] = array('#theme' => 'pager');
     return $build;
-}
-
-function bill_distribution(){
-    $pagecontent = drupal_render(bills_list(true));
-    $pagecontent .= "<hr/>";
-    
-    return $pagecontent;
-}
-
-function bill_distribution_form(){
-    
 }
