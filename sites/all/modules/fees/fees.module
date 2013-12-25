@@ -1,4 +1,4 @@
-fees<?php
+<?php
 
 // $Id: fees.info,v 1.4 2011/07/04 13:25:57 dries Exp $
 
@@ -52,7 +52,7 @@ function fees_status_page_call_back() {
     );
 
     $query = db_select('fees', 'f')
-                    ->extend('PagerDefault');
+             ->extend('PagerDefault');
 
     $fields = array('fees_name', 'fees_scale', 'fees_orc', 'fees_desc');
 

@@ -96,9 +96,7 @@ function bills_create_form($form, &$form_state) {
     $form['billsno_type'] = array(
         '#type' => 'select',
         '#required' => TRUE,
-        '#options' => array('发票' => '发票',
-            '地税' => '地税',
-            '国税' => '国税',),
+        '#options' => get_bills_type(),
         '#title' => t('票据类型'),
     );
 
@@ -113,9 +111,9 @@ function bills_create_form_validate($form, &$form_state) {
     $start = $form_state['values']['billsno_start'] + 0;
     $end = $form_state['values']['billsno_end'] + 0;
 
-    if (!is_int($start))
+    if (!is_int($start) || $start==0)
         form_set_error('billsno_start', t('起始票据编号必须是数字.'));
-    if (!is_int($end))
+    if (!is_int($end) || $end==0)
         form_set_error('billsno_end', t('结束票据编号必须是数字.'));
     if ($start > $end) {
         form_set_error('billsno_end', t('结束票据编号不能小于起始票据编号。'));

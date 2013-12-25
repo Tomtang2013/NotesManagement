@@ -1,0 +1,229 @@
+<?php
+
+// $Id: bills_billing.info,v 1.4 2011/07/04 13:25:57 dries Exp $
+
+/**
+ * Implementation of hook_init
+ */
+function bills_billing_init() {
+
+}
+
+/**
+ * Implements hook_help().
+ */
+function bills_billing_help($path, $arg) {
+    switch ($path) {
+        case 'admin/help#bills_billing':
+            $output = '<h3>' . t('About') . '</h3>';
+            $output .= '<p>' . t('开具票据');
+            return $output;
+    }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function bills_billing_permission() {
+    return array(
+        'bills_billing' => array(
+            'title' => t('开具票据'),
+        ),
+    );
+}
+
+function bills_billing_menu() {
+    $items = array();
+    $items['billsbilling'] = array(
+        'title' => t('开具票据'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('bills_billing_form'),
+        'access arguments' => array('bills_billing'),
+        'weight' => 0,
+    );
+
+    $items['billing/fee_name_autocomplete'] = array(
+    'page callback' => 'fee_name_autocomplete',
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('bills_billing'),
+  );
+    return $items;
+}
+
+function bills_billing_form($form, &$form_state) {
+    $form['description'] = array(
+        '#billing' => 'item',
+        '#title' => t("开具票据"),
+    );
+    // This is the first form element. It's a textfield with a label, "Name"
+    $form['billing_type'] = array(
+        '#type' => 'select',
+        '#required' => TRUE,
+        '#options' => get_billingable_bills_type(),
+        '#title' => t('开具票据类型'),
+        '#ajax' => array(
+          'callback' => 'billing_no_callback',
+          'wrapper' => 'billing_no_replace',
+        ),
+    );
+
+    $form['billing_no'] = array(
+        '#type' => 'textfield',
+        '#title' => t('开具票据编号'),
+        '#required' => TRUE,
+        '#prefix' => '<div id="billing_no_replace">',
+        '#suffix' => '</div>',
+        '#attributes' => array('readonly' => 'readonly'),
+    );
+
+    $form['billing_fee'] = array(
+        '#type' => 'textfield',
+        '#required' => TRUE,
+        '#title' => t('收费项目'),
+        '#autocomplete_path' => 'billing/fee_name_autocomplete',
+    );
+
+    $form['billing_number'] = array(
+        '#type' => 'textfield',
+        '#required' => TRUE,
+        '#title' => t('数量'),
+    );
+
+    $form['billing_amount'] = array(
+        '#type' => 'textfield',
+        '#required' => TRUE,
+        '#title' => t('金额'),
+    );
+
+    $form['billing_method'] = array(
+        '#type' => 'select',
+        '#required' => TRUE,
+        '#options' => array('现金'=>'现金','支票'=>'支票','暂借'=>'暂借'),
+        '#title' => t('缴款方式'),
+    );
+
+    
+    $form['billing_contact'] = array(
+        '#title' => t('联系方式'),
+        '#type' => 'textfield',
+        '#prefix' => '<div id="billing_method_replace">',
+        '#suffix' => '</div>',
+    );
+
+     $form['billing_comment'] = array(
+        '#title' => t('备注'),
+        '#type' => 'textarea',
+    );
+
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => '提交',
+    );
+    return $form;
+}
+
+function fee_name_autocomplete($string = ""){
+  $matches = array();
+  if ($string) {
+    $result = db_select('fees')
+      ->fields('fees', array('fees_name','fees_orc'))
+      ->condition('fees_name', db_like($string) . '%', 'LIKE')
+      ->range(0, 10)
+      ->execute();
+    foreach ($result as $fees) {
+      $matches[$fees->fees_name] = check_plain($fees->fees_name) . "(收费单位：$fees->fees_orc)";
+    }
+  }
+
+  drupal_json_output($matches);
+}
+
+function billing_no_callback(&$form, $form_state) {
+    $type = $form['billing_type']['#value'];
+    if(empty($type)){
+        $form['billing_no']['#value'] = '';
+    } else {
+        $form['billing_no']['#value'] = get_available_bill_no($type);
+    }
+ 
+  return $form['billing_no'];
+}
+
+function get_available_bill_no($type){
+      $query = db_select('bills', 'b');
+    global $user;
+    $result = array();
+    if($user->uid == 1){
+        $query->fields('b', array('billsno'))
+            ->condition('status','可用','=')
+            ->condition('type',$type,'=');
+        $result = $query->execute()->fetchField() ;
+    } else {
+        $query->fields('b', array('billsno'))
+            ->condition('status', '可用', '=')
+            ->condition('type', $type, '=')
+            ->condition('distribution_uid',$user->uid,'=')
+                ->orderBy($field);
+        $result = $query->execute()->fetchField() ;
+    }
+
+    return $result;
+}
+
+function bills_billing_form_validate($form, &$form_state) {
+    $type = $form_state['values']['billing_method'];
+    $amount = $form_state['values']['billing_amount']+0;
+    $number = $form_state['values']['billing_number']+0;
+
+    if($type == '暂借'){
+        form_set_error('billing_contact', t('当缴款方式为暂借时，请输入联系方式'));
+    }
+    if(!is_numeric($amount) || $amount==0){
+        form_set_error('billing_amount', t('请输入正确的金额'));
+    }
+    if(!is_numeric($number) || $number==0){
+        form_set_error('billing_number', t('请输入正确的数量'));
+    }
+
+}
+
+function bills_billing_form_submit($form, &$form_state) {
+//    $name = $form_state['values']['bills_billing_name'];
+//    $value[] = array(
+//        'billing_name' => $name,
+//    );
+//    $fields = array('billing_name');
+//
+//    $query = db_insert('bills_billing')->fields($fields)->values($value);
+//
+//    try {
+//        $result = $query->execute();
+//        drupal_set_message(t("票据类型录入成功"));
+//    } catch (Exception $e) {
+//        dd($e);
+//        drupal_set_message('票据类型录入失败，请联系管理员', 'error');
+//    }
+}
+
+function get_billingable_bills_type(){
+    $query = db_select('bills', 'b');
+    global $user;
+    $result = array();
+    if($user->uid == 1){
+        $query->fields('b', array('type'))
+            ->condition('status','可用','=')
+            ->groupBy('b.type');
+        $result = $query->execute();
+    } else {
+        $query->fields('b', array('type'))
+            ->condition('distribution_uid',$user->uid,'=')
+            ->groupBy('b.type');
+        $result = $query->execute();
+    }
+   
+    $rows = array();
+    foreach ($result as $row) {
+        $rows[$row->type] = $row->type;
+    }
+    return $rows;
+}

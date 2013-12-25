@@ -1,0 +1,10 @@
+name = Bills Billing
+description = 开具票据.
+core = 7.x
+
+package = Bills Management
+
+version = "7.x-1.0"
+core = "7.x"
+project = "bills billing"
+datestamp = "1386406401"

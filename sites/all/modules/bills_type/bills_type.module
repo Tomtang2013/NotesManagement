@@ -118,7 +118,19 @@ function bills_type_create_form_submit($form, &$form_state) {
         $result = $query->execute();
         drupal_set_message(t("票据类型录入成功"));
     } catch (Exception $e) {
-        dd($e);
         drupal_set_message('票据类型录入失败，请联系管理员', 'error');
     }
+}
+
+function get_bills_type(){
+    $fields = array('type_id', 'type_name');
+    $query = db_select('bills_type', 'b'); 
+    $query->fields('b', $fields);
+    $result = $query->orderBy('b.type_id')
+                    ->execute();
+    $rows = array();
+    foreach ($result as $row) {
+        $rows[$row->type_id] = $row->type_name;
+    }
+    return $rows;
 }

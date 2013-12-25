@@ -101,10 +101,6 @@ function bills_handin_form($form, &$form_state) {
         '#type' => 'submit',
         '#value' => t('提交'),
     );
-    if (!empty($form['billsnos_fieldset']['remove_name']['#ajax'])) {
-        unset($form['billsnos_fieldset']['remove_name']['#ajax']);
-    }
-    unset($form['billsnos_fieldset']['add_name']['#ajax']);
 
     return $form;
 }

@@ -317,3 +317,9 @@ table .odd{
     display:none;
 }
 
+
+/****************************************/
+
+html.js input.form-autocomplete{
+    background-position: 100% 6px;  
+}
