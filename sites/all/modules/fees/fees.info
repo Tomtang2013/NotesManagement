@@ -1,0 +1,10 @@
+name = Fees
+description = 收费项目.
+core = 7.x
+
+package = Bills Management
+
+version = "7.x-1.0"
+core = "7.x"
+project = "fees"
+datestamp = "1386406401"

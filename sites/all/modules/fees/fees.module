@@ -1,0 +1,174 @@
+fees<?php
+
+// $Id: fees.info,v 1.4 2011/07/04 13:25:57 dries Exp $
+
+/**
+ * Implementation of hook_init
+ */
+function fees_init() {
+
+}
+
+/**
+ * Implements hook_help().
+ */
+function fees_help($path, $arg) {
+    switch ($path) {
+        case 'admin/help#fees':
+            $output = '<h3>' . t('About') . '</h3>';
+            $output .= '<p>' . t('收费项目');
+            return $output;
+    }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function fees_permission() {
+    return array(
+        'fees' => array(
+            'title' => t('收费项目'),
+        ),
+    );
+}
+
+function fees_menu() {
+    $items = array();
+    $items['fees'] = array(
+        'title' => t('收费项目'),
+        'page callback' => 'fees_status_page_call_back',
+        'access arguments' => array('fees'),
+        'weight' => 0,
+    );
+    return $items;
+}
+
+function fees_status_page_call_back() {
+    $header = array(
+        array('data' => t('项目名称'), 'field' => 'f.fees_name'),
+        array('data' => t('规模(人)'), 'field' => 'f.fees_scale'),
+        array('data' => t('收费单位'), 'field' => 'f.fees_orc'),
+        array('data' => t('备注'), 'field' => 'f.fees_desc'),
+    );
+
+    $query = db_select('fees', 'f')
+                    ->extend('PagerDefault');
+
+    $fields = array('fees_name', 'fees_scale', 'fees_orc', 'fees_desc');
+
+    $query->fields('f', $fields);
+    $result = $query
+                    ->limit(10)
+                    ->orderBy('f.fees_name')
+                    ->execute();
+
+    $rows = array();
+    foreach ($result as $row) {
+        $rows[] = array('data' => (array) $row);
+    }
+
+    $build['tablesort_table'] = array(
+        '#theme' => 'table',
+        '#header' => $header,
+        '#rows' => $rows,
+    );
+
+    $build['pager_pager'] = array('#theme' => 'pager');
+    $pagecontent = '';
+    $pagecontent .= drupal_render($build);
+    $pagecontent .= "<hr/>";
+    $pagecontent .= drupal_render(drupal_get_form("fees_create_form"));
+
+    return $pagecontent;
+}
+
+function fees_create_form($form, &$form_state) {
+    $form['description'] = array(
+        '#type' => 'item',
+        '#title' => t("收费项目"),
+    );
+    // This is the first form element. It's a textfield with a label, "Name"
+    $form['fees_name'] = array(
+        '#type' => 'textfield',
+        '#size' => '50',
+        '#required' => TRUE,
+        '#maxlength' => '50',
+        '#title' => t('项目名称'),
+    );
+
+//    $form['fees_date'] = array(
+//        '#type' => 'textfield',
+//        '#size' => '20',
+//        '#required' => TRUE,
+//        '#maxlength' => '10',
+//        '#title' => t('收费日期'),
+//    );
+
+     $form['fees_date'] = array(
+        '#type' => 'datepicker',
+        '#date_format' => 'd/m/Y',
+        '#required' => TRUE,
+        '#maxlength' => '10',
+        '#title' => t('收费日期'),
+    );
+
+
+    $form['fees_scale'] = array(
+        '#type' => 'textfield',
+        '#size' => '20',
+        '#required' => TRUE,
+        '#maxlength' => '20',
+        '#title' => t('收费规模'),
+    );
+
+    $form['fees_orc'] = array(
+        '#type' => 'textfield',
+        '#size' => '20',
+        '#required' => TRUE,
+        '#maxlength' => '10',
+        '#title' => t('收费单位'),
+    );
+
+    $form['fees_desc'] = array(
+        '#type' => 'textarea',
+        '#size' => '20',
+        '#title' => t('备注'),
+    );
+
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => '提交',
+    );
+    return $form;
+}
+
+function fees_create_form_validate($form, &$form_state) {
+}
+
+function fees_create_form_submit($form, &$form_state) {
+    $name = $form_state['values']['fees_name'];
+    $scale = $form_state['values']['fees_scale'];
+    $date = $form_state['values']['fees_date'];
+    $orc = $form_state['values']['fees_orc'];
+    $desc = $form_state['values']['fees_desc'];
+    $amount = 0;
+    $date = strtotime($date);
+
+    $values = array(
+        'fees_name' => $name,
+        'fees_scale' => $scale,
+        'fees_date' => $date,
+        'fees_orc' => $orc,
+        'fees_desc' => $desc,
+    );
+    $fields = array('fees_name', 'fees_scale', 'fees_date', 'fees_orc', 'fees_desc');
+
+    $query = db_insert('fees')->fields($fields)->values($values);
+
+    try {
+        $result = $query->execute();
+        drupal_set_message(t("收费项目录入成功"));
+    } catch (Exception $e) {
+        drupal_set_message('收费项目录入失败，请联系管理员', 'error');
+    }
+}

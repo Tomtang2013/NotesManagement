@@ -37,48 +37,23 @@ function bills_menu() {
     $items['bills'] = array(
         'title' => t('票据管理'),
         'page callback' => 'bill_status_page_call_back',
-        'page arguments' => array('bills'),
         'access arguments' => array('bills'),
         'weight' => 0,
     );
+    
+    $items['billsdistribution'] = array(
+        'title' => t('票据分配'),
+        'page callback' => 'bill_distribution',
+        'access arguments' => array('bill_distribution'),
+        'weight' => 0,
+    );
+
+
     return $items;
 }
 
 function bill_status_page_call_back() {
-    $header = array(
-        array('data' => t('票据编号'), 'field' => 'b.billsno'),
-        array('data' => t('票据类型'), 'field' => 'b.type'),
-        array('data' => t('票据状态'), 'field' => 'b.status'),
-        array('data' => t('票据金额'), 'field' => 'b.amount'),
-//        array('data' => t('入库时间'), 'field' => 'b.createdate'),
-//        array('data' => t('最后更新时间'), 'field' => 'b.lastupdate'),
-    );
-
-    $query = db_select('bills', 'b')
-                    ->extend('PagerDefault');
-
-    $fields = array('billsno', 'type', 'status', 'amount');
-
-    $query->fields('b', $fields);
-    $result = $query
-                    ->limit(10)
-                    ->orderBy('b.billsno')
-                    ->execute();
-
-    $rows = array();
-    foreach ($result as $row) {
-        $rows[] = array('data' => (array) $row);
-    }
-
-    $build['tablesort_table'] = array(
-        '#theme' => 'table',
-        '#header' => $header,
-        '#rows' => $rows,
-    );
-
-    $build['pager_pager'] = array('#theme' => 'pager');
-
-    $pagecontent = drupal_render($build);
+    $pagecontent = drupal_render(bills_list());
     $pagecontent .= "<hr/>";
     $pagecontent .= drupal_render(drupal_get_form("bills_create_form"));
 
@@ -172,4 +147,57 @@ function bills_create_form_submit($form, &$form_state) {
     } catch (Exception $e) {
         drupal_set_message('票据录入失败，请联系管理员', 'error');
     }
+}
+
+function bills_list($hasOpt = false){
+      $header = array(
+        array('data' => t('票据编号'), 'field' => 'b.billsno'),
+        array('data' => t('票据类型'), 'field' => 'b.type'),
+        array('data' => t('票据状态'), 'field' => 'b.status'),
+        array('data' => t('票据金额'), 'field' => 'b.amount'),
+    );
+
+    $query = db_select('bills', 'b')
+                    ->extend('PagerDefault');
+
+    $fields = array('billsno', 'type', 'status', 'amount');
+
+    if($hasOpt){
+       $header[] = array('data' => t('操作'), 'field' => 'opt');
+     }
+     
+    $query->fields('b', $fields);
+    $result = $query
+                    ->limit(10)
+                    ->orderBy('b.billsno')
+                    ->execute();
+
+    $rows = array();
+    foreach ($result as $row) {
+        if($hasOpt){
+            $row->opt = l('选中','www.google.cn');
+        }
+        $rows[] = array('data' => (array) $row);
+       
+    }
+
+    $build['tablesort_table'] = array(
+        '#theme' => 'table',
+        '#header' => $header,
+        '#rows' => $rows,
+    );
+
+    $build['pager_pager'] = array('#theme' => 'pager');
+    return $build;
+}
+
+function bill_distribution(){
+    $pagecontent = drupal_render(bills_list(true));
+    $pagecontent .= "<hr/>";
+    
+    return $pagecontent;
+}
+
+function bill_distribution_form(){
+    
 }

@@ -1,0 +1,124 @@
+<?php
+
+// $Id: bills_type.info,v 1.4 2011/07/04 13:25:57 dries Exp $
+
+/**
+ * Implementation of hook_init
+ */
+function bills_type_init() {
+
+}
+
+/**
+ * Implements hook_help().
+ */
+function bills_type_help($path, $arg) {
+    switch ($path) {
+        case 'admin/help#bills_type':
+            $output = '<h3>' . t('About') . '</h3>';
+            $output .= '<p>' . t('票据类型管理');
+            return $output;
+    }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function bills_type_permission() {
+    return array(
+        'bills_type' => array(
+            'title' => t('票据类型管理'),
+        ),
+    );
+}
+
+function bills_type_menu() {
+    $items = array();
+    $items['billstype'] = array(
+        'title' => t('票据类型管理'),
+        'page callback' => 'bills_type_page_call_back',
+        'access arguments' => array('bills_type'),
+        'weight' => 0,
+    );
+    return $items;
+}
+
+function bills_type_page_call_back() {
+    $header = array(
+        array('data' => t('票据类型编号'), 'field' => 'b.type_id'),
+        array('data' => t('票据类型名称'), 'field' => 'b.type_name'),
+    );
+
+    $query = db_select('bills_type', 'b')
+                    ->extend('PagerDefault');
+
+    $fields = array('type_id', 'type_name');
+
+    $query->fields('b', $fields);
+    $result = $query
+                    ->limit(10)
+                    ->orderBy('b.type_id')
+                    ->execute();
+
+    $rows = array();
+    foreach ($result as $row) {
+        $rows[] = array('data' => (array) $row);
+    }
+
+    $build['tablesort_table'] = array(
+        '#theme' => 'table',
+        '#header' => $header,
+        '#rows' => $rows,
+    );
+
+    $build['pager_pager'] = array('#theme' => 'pager');
+
+    $pagecontent = drupal_render($build);
+    $pagecontent .= "<hr/>";
+    $pagecontent .= drupal_render(drupal_get_form("bills_type_create_form"));
+
+    return $pagecontent;
+}
+
+function bills_type_create_form($form, &$form_state) {
+    $form['description'] = array(
+        '#type' => 'item',
+        '#title' => t("票据类型录入"),
+    );
+    // This is the first form element. It's a textfield with a label, "Name"
+    $form['bills_type_name'] = array(
+        '#type' => 'textfield',
+        '#size' => '20',
+        '#required' => TRUE,
+        '#maxlength' => '10',
+        '#title' => t('票据类型'),
+    );
+
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => '提交',
+    );
+    return $form;
+}
+
+function bills_type_create_form_validate($form, &$form_state) {
+
+}
+
+function bills_type_create_form_submit($form, &$form_state) {
+    $name = $form_state['values']['bills_type_name'];
+    $value[] = array(
+        'type_name' => $name,
+    );
+    $fields = array('type_name');
+
+    $query = db_insert('bills_type')->fields($fields)->values($value);
+
+    try {
+        $result = $query->execute();
+        drupal_set_message(t("票据类型录入成功"));
+    } catch (Exception $e) {
+        dd($e);
+        drupal_set_message('票据类型录入失败，请联系管理员', 'error');
+    }
+}
