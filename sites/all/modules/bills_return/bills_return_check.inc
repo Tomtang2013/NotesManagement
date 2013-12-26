@@ -1,5 +1,5 @@
 <?php
-function bills_handin_check_form($form, &$form_state) {
+function bills_return_check_form($form, &$form_state) {
     $header = array(
         'billsno' => t('票据编号'),
         'type' => t('票据类型'),
@@ -13,7 +13,7 @@ function bills_handin_check_form($form, &$form_state) {
 
     $query->fields('b', $fields);
     $str_query = $query
-                    ->condition('b.status', '已缴销', '=')
+                    ->condition('b.status', '已退回', '=')
                     ->limit(10)
                     ->orderBy('b.billsno');
     $result = $str_query->execute();
@@ -31,7 +31,7 @@ function bills_handin_check_form($form, &$form_state) {
 
     $form['description'] = array(
         '#type' => 'item',
-        '#title' => t("确认缴销票据"),
+        '#title' => t("确认退回票据"),
     );
 
     $form['table'] = array(
@@ -54,7 +54,7 @@ function bills_handin_check_form($form, &$form_state) {
 }
 
 
-function bills_handin_check_form_validate($form, &$form_state) {
+function bills_return_check_form_validate($form, &$form_state) {
    $table = $form_state['values']['table'] ;
    $rst = 0;
    foreach($table as $row){
@@ -64,10 +64,10 @@ function bills_handin_check_form_validate($form, &$form_state) {
        }
    }
    if($rst == 0)
-       form_set_error('', t('请选择已经收到的缴销票据编号.'));
+       form_set_error('', t('请选择已经收到的退回票据编号.'));
 }
 
-function bills_handin_check_form_submit($form, &$form_state) {
+function bills_return_check_form_submit($form, &$form_state) {
     $table = $form_state['values']['table'] ;
 
    $bill_nos = array();
@@ -79,14 +79,14 @@ function bills_handin_check_form_submit($form, &$form_state) {
 
     $query = db_update('bills')
       ->fields(array(
-        'report_date' => time(),
-        'status' => '已确认',
+        'status' => '可用',
+        'distribution_uid' => 0,
       ))
       ->condition('billsno', $bill_nos, 'in');
     try {
         $result = $query->execute();
-        drupal_set_message(t("票据缴销确认成功"));
+        drupal_set_message(t("票据退回确认成功"));
     } catch (Exception $e) {
-        drupal_set_message('票据缴销确认失败，请联系管理员', 'error');
+        drupal_set_message('票据退回确认失败，请联系管理员', 'error');
     }
 }

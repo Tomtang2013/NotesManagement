@@ -1,0 +1,10 @@
+name = Bills Return
+description = 票据退回
+core = 7.x
+
+package = Bills Management
+
+version = "7.x-1.0"
+core = "7.x"
+project = "bills_return"
+datestamp = "1386406401"

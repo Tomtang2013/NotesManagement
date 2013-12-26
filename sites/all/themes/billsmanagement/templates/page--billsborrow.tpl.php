@@ -1,6 +1,6 @@
 <?php
 ?>
-%%%%%%%%%%%%%%%%
+
 <div id="pr_dashboard_page" class="pr_page">
     <?php require_once 'header.tpl.php';?>
     <div id="pr_dashboard_content" class="pr_content">

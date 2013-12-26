@@ -1,0 +1,58 @@
+<?php
+
+// $Id: bills_return.info,v 1.4 2011/07/04 13:25:57 dries Exp $
+
+/**
+ * Implementation of hook_init
+ */
+function bills_return_init() {
+
+}
+
+/**
+ * Implements hook_help().
+ */
+function bills_return_help($path, $arg) {
+    switch ($path) {
+        case 'admin/help#bills_return':
+            $output = '<h3>' . t('About') . '</h3>';
+            $output .= '<p>' . t('票据退回');
+            return $output;
+    }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function bills_return_permission() {
+    return array(
+        'bills_return' => array(
+            'title' => t('票据退回'),
+        ),
+    );
+}
+
+function bills_return_menu() {
+    $items = array();
+    $items['billsreturn'] = array(
+        'title' => t('票据退回'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('bills_return_form'),
+        'access arguments' => array('bills_return'),
+        'file' => 'bills_return.inc',
+        'access arguments' => array('bills_return'),
+        'weight' => 0,
+    );
+
+    $items['billsreturncheck'] = array(
+        'title' => t('票据退回确认'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('bills_return_check_form'),
+        'access arguments' => array('bills_return'),
+        'file' => 'bills_return_check.inc',
+        'access arguments' => array('bills_return'),
+        'weight' => 0,
+    );
+
+    return $items;
+}

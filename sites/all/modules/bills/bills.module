@@ -59,6 +59,24 @@ function bills_menu() {
         'weight' => 0,
     );
 
+    $items['billswrong'] = array(
+        'title' => t('错票处理'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('bills_wrong_form'),
+        'access arguments' => array('bills_wrong'),
+        'file' => 'bills_wrong.inc',
+        'weight' => 0,
+    );
+
+    $items['billsdisable'] = array(
+        'title' => t('废票处理'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('bills_disable_form'),
+        'access arguments' => array('bills_disable'),
+        'file' => 'bills_disable.inc',
+        'weight' => 0,
+    );
+
 
     return $items;
 }

@@ -1,0 +1,163 @@
+<?php
+
+// $Id: bills_borrow.info,v 1.4 2011/07/04 13:25:57 dries Exp $
+
+/**
+ * Implementation of hook_init
+ */
+function bills_borrow_init() {
+
+}
+
+/**
+ * Implements hook_help().
+ */
+function bills_borrow_help($path, $arg) {
+    switch ($path) {
+        case 'admin/help#bills_borrow':
+            $output = '<h3>' . t('About') . '</h3>';
+            $output .= '<p>' . t('暂借票据处理');
+            return $output;
+    }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function bills_borrow_permission() {
+    return array(
+        'bills_borrow' => array(
+            'title' => t('暂借票据处理'),
+        ),
+    );
+}
+
+function bills_borrow_menu() {
+    $items = array();
+    $items['billsborrow'] = array(
+        'title' => t('暂借票据处理'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('bills_borrow_form'),
+        'access arguments' => array('bills_borrow'),
+        'weight' => 0,
+    );
+
+    return $items;
+}
+
+function bills_borrow_form($form, &$form_state) {
+    $header = array(
+        'billsno' => t('编号'),
+        'type' => t('类型'),
+        'fee_name' => t('项目'),
+        'amount' => t('金额'),
+        'number' => t('数量'),
+        'return_date' => t('还款日期'),
+        'return_status' => t('归还状态'),
+        'contact' => t('联系方式'),
+    );
+    $query = db_select('bills_billing', 'bb')
+             ->extend('PagerDefault');
+    $query->addField('b', 'type');
+    $query->addField('b', 'amount');
+
+    $fields = array('bills_no', 'fee_name', 'number', 'return_status','contact');
+
+    global $user;
+
+    $query->fields('bb', $fields);
+    $query->addField('bb', 'return_date');
+//    ,''
+    $query->join('bills','b','bb.bills_no = b.billsno');
+    $query->condition('b.status', '已开具', '=')
+            ->condition('bb.payment_method', '暂借', '=')
+            ->limit(10)
+            ->orderBy('bb.bills_no');
+
+    if($user->uid !=1){
+        $query->condition('b.distribution_uid', $user->uid, '=');
+    }
+    
+    $str_query  = $query;
+    $result = $str_query->execute();
+
+    $rows = array();
+    foreach ($result as $row) {
+        $rows[$row->bills_no] = array(
+            'billsno' => $row->bills_no,
+            'type' => $row->type,
+            'number' => $row->number,
+            'amount' => $row->amount,
+            'return_date' => date("Y-m-d",$row->return_date),
+            'fee_name' => $row->fee_name,
+            'return_status' => $row->return_status,
+            'contact' => $row->contact,
+        );
+    }
+    $form = array();
+
+    $form['description'] = array(
+        '#type' => 'item',
+        '#title' => t("暂借票处理"),
+    );
+
+    $form['table'] = array(
+        '#type' => 'tableselect',
+        '#header' => $header,
+        '#options' => $rows,
+        '#multiple' => FALSE,
+    );
+
+    $form['pager'] = array('#markup' => theme('pager'));
+
+    $form['return_date'] = array(
+        '#type' => 'datepicker',
+        '#date_format' => 'd/m/Y',
+        '#required' => TRUE,
+        '#maxlength' => '10',
+        '#title' => t('还款日期'),
+    );
+
+    $form['return_status'] = array(
+        '#type' => 'checkbox', 
+        '#values' => array( '未还' , '已还' ),
+        '#title' => t('还款状态（已还/未还）'),
+    );
+     
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => '提交',
+    );
+
+
+    return $form;
+}
+
+function bills_borrow_form_validate($form, &$form_state) {
+    $value = $form_state['values']['table'] ;
+   if(empty($value))
+       form_set_error('', t('请选择需编辑的票据.'));
+
+}
+
+function bills_borrow_form_submit($form, &$form_state) {
+    $bills_no =  $form_state['values']['table'] ;
+    $return_date = $form_state['values']['return_date'];
+    $return_status = $form_state['values']['return_status'];
+    $return_date = strtotime($return_date);
+    $return_status = $return_status == 0?'未归还':'已归还';
+    global $user;
+
+    $query = db_update('bills_billing')
+      ->fields(array(
+        'return_date' => $return_date,
+        'return_status' => $return_status,
+      ))
+      ->condition('bills_no', $bills_no, '=');
+    try {
+        $result = $query->execute();
+        drupal_set_message(t("暂借票据处理成功"));
+    } catch (Exception $e) {
+        drupal_set_message('暂借票据处理失败，请联系管理员', 'error');
+    }
+}

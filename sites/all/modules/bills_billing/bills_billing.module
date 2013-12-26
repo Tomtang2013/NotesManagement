@@ -175,15 +175,26 @@ function bills_billing_form_validate($form, &$form_state) {
     $amount = $form_state['values']['billing_amount']+0;
     $number = $form_state['values']['billing_number']+0;
     $contact = $form_state['values']['billing_contact']+0;
+    $fee = $form_state['values']['billing_fee'];
 
     if($type == '暂借' && empty($contact)){
-        form_set_error('billing_contact', t('当缴款方式为暂借时，请输入联系方式'));
+        form_set_error('billing_contact', t('当缴款方式为暂借时，请输入联系方式。'));
     }
     if(!is_numeric($amount) || $amount==0){
-        form_set_error('billing_amount', t('请输入正确的金额'));
+        form_set_error('billing_amount', t('请输入正确的金额。'));
     }
     if(!is_numeric($number) || $number==0){
-        form_set_error('billing_number', t('请输入正确的数量'));
+        form_set_error('billing_number', t('请输入正确的数量。'));
+    }
+
+   $result = db_select('fees')
+      ->fields('fees', array('fees_name'))
+      ->condition('fees_name', $fee, '=')
+      ->execute();
+    $num_of_results = $result->rowCount();
+
+    if($num_of_results == 0){
+        form_set_error('billing_fee', t('请输入正确的收费项目名称。'));
     }
 
 }

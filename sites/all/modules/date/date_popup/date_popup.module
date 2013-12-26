@@ -503,7 +503,7 @@ function date_popup_validate($element, &$form_state) {
       return;
     }
     if ($element['#required']) {
-      $message = t('A valid date is required for %title.', array('%title' => $label));
+      $message = t('必须填写 %title.', array('%title' => $label));
       form_set_error($error_field, $message);
       return;
     }

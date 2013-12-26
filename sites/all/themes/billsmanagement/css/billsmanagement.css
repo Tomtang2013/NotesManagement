@@ -6,6 +6,20 @@
         Purpose of the stylesheet follows.
 */
 /*************************Base CSS for basic page layout********************************/
+hr{
+    clear:none;
+}
+
+.item-list .pager{
+     clear:none;
+}
+.container-inline-date{
+     clear:none;    
+}
+
+.placeholder{
+    font-style:normal;
+}
 .pr_page {
     width: 920px;
     padding: 0 40px;
