@@ -130,7 +130,7 @@ function get_bills_type(){
                     ->execute();
     $rows = array();
     foreach ($result as $row) {
-        $rows[$row->type_id] = $row->type_name;
+        $rows[$row->type_name] = $row->type_name;
     }
     return $rows;
 }

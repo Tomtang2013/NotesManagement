@@ -36,102 +36,23 @@ function bills_handin_menu() {
     $items = array();
     $items['billshandin'] = array(
         'title' => t('票据缴销'),
-        'page callback' => 'bills_handin_call_back',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('bills_handin_form'),
+        'access arguments' => array('bills_handin'),
+        'file' => 'bills_handin.inc',
+        'access arguments' => array('bills_handin'),
+        'weight' => 0,
+    );
+
+    $items['billshandincheck'] = array(
+        'title' => t('票据缴销确认'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('bills_handin_check_form'),
+        'access arguments' => array('bills_handin'),
+        'file' => 'bills_handin_check.inc',
         'access arguments' => array('bills_handin'),
         'weight' => 0,
     );
 
     return $items;
-}
-
-function bills_handin_call_back() {
-    $pagecontent = '';
-    $pagecontent .= drupal_render(drupal_get_form("bills_handin_form"));
-    return $pagecontent;
-}
-
-function bills_handin_form($form, &$form_state) {
-    $form['description'] = array(
-        '#type' => 'item',
-        '#title' => t("票据缴销"),
-    );
-
-    $form['#tree'] = TRUE;
-    $form['billsnos_fieldset'] = array(
-        '#type' => 'fieldset',
-        '#title' => t('缴销票据'),
-        '#prefix' => '<div id="billsnos-fieldset-wrapper">',
-        '#suffix' => '</div>',
-    );
-
-    // Build the fieldset with the proper number of names. We'll use
-    // $form_state['num_names'] to determine the number of textfields to build.
-    if (empty($form_state['num_names'])) {
-        $form_state['num_names'] = 1;
-    }
-    for ($i = 0; $i < $form_state['num_names']; $i++) {
-        $form['billsnos_fieldset']['name'][$i] = array(
-            '#type' => 'textfield',
-            '#title' => t('票据编号'),
-        );
-    }
-    $form['billsnos_fieldset']['add_name'] = array(
-        '#type' => 'submit',
-        '#value' => t('增加缴销票据'),
-        '#submit' => array('bills_handin_add_more_add_one'),
-        // See the examples in bills_handin.module for more details on the
-        // properties of #ajax.
-        '#ajax' => array(
-            'callback' => 'bills_handin_add_more_callback',
-            'wrapper' => 'billsnos-fieldset-wrapper',
-        ),
-    );
-    if ($form_state['num_names'] > 1) {
-        $form['billsnos_fieldset']['remove_name'] = array(
-            '#type' => 'submit',
-            '#value' => t('删除缴销票据'),
-            '#submit' => array('bills_handin_add_more_remove_one'),
-            '#ajax' => array(
-                'callback' => 'bills_handin_add_more_callback',
-                'wrapper' => 'billsnos-fieldset-wrapper',
-            ),
-        );
-    }
-    $form['submit'] = array(
-        '#type' => 'submit',
-        '#value' => t('提交'),
-    );
-
-    return $form;
-}
-
-/**
- * Callback for both ajax-enabled buttons.
- *
- * Selects and returns the fieldset with the names in it.
- */
-function bills_handin_add_more_callback($form, $form_state) {
-    return $form['billsnos_fieldset'];
-}
-
-/**
- * Submit handler for the "add-one-more" button.
- *
- * Increments the max counter and causes a rebuild.
- */
-function bills_handin_add_more_add_one($form, &$form_state) {
-    $form_state['num_names']++;
-    $form_state['rebuild'] = TRUE;
-}
-
-/**
- * Submit handler for the "remove one" button.
- *
- * Decrements the max counter and causes a form rebuild.
- */
-function bills_handin_add_more_remove_one($form, &$form_state) {
-    if ($form_state['num_names'] > 1) {
-        $form_state['num_names']--;
-    }
-    $form_state['rebuild'] = TRUE;
 }

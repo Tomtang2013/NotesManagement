@@ -110,7 +110,6 @@ function bills_create_form($form, &$form_state) {
 function bills_create_form_validate($form, &$form_state) {
     $start = $form_state['values']['billsno_start'] + 0;
     $end = $form_state['values']['billsno_end'] + 0;
-
     if (!is_int($start) || $start==0)
         form_set_error('billsno_start', t('起始票据编号必须是数字.'));
     if (!is_int($end) || $end==0)
@@ -147,6 +146,7 @@ function bills_create_form_submit($form, &$form_state) {
         $result = $query->execute();
         drupal_set_message(t("票据录入成功"));
     } catch (Exception $e) {
+        watchdog_exception('bills input error', $e);
         drupal_set_message('票据录入失败，请联系管理员', 'error');
     }
 }

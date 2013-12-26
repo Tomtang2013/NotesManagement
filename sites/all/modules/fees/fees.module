@@ -96,14 +96,6 @@ function fees_create_form($form, &$form_state) {
         '#title' => t('项目名称'),
     );
 
-//    $form['fees_date'] = array(
-//        '#type' => 'textfield',
-//        '#size' => '20',
-//        '#required' => TRUE,
-//        '#maxlength' => '10',
-//        '#title' => t('收费日期'),
-//    );
-
      $form['fees_date'] = array(
         '#type' => 'datepicker',
         '#date_format' => 'd/m/Y',
@@ -169,6 +161,7 @@ function fees_create_form_submit($form, &$form_state) {
         $result = $query->execute();
         drupal_set_message(t("收费项目录入成功"));
     } catch (Exception $e) {
+        watchdog_exception('fees error', $e);
         drupal_set_message('收费项目录入失败，请联系管理员', 'error');
     }
 }

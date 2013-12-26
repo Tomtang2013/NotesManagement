@@ -160,10 +160,10 @@ function get_available_bill_no($type){
         $result = $query->execute()->fetchField() ;
     } else {
         $query->fields('b', array('billsno'))
-            ->condition('status', '可用', '=')
+            ->condition('status', '已分配', '=')
             ->condition('type', $type, '=')
             ->condition('distribution_uid',$user->uid,'=')
-                ->orderBy($field);
+            ->orderBy('billsno');
         $result = $query->execute()->fetchField() ;
     }
 
@@ -174,8 +174,9 @@ function bills_billing_form_validate($form, &$form_state) {
     $type = $form_state['values']['billing_method'];
     $amount = $form_state['values']['billing_amount']+0;
     $number = $form_state['values']['billing_number']+0;
+    $contact = $form_state['values']['billing_contact']+0;
 
-    if($type == '暂借'){
+    if($type == '暂借' && empty($contact)){
         form_set_error('billing_contact', t('当缴款方式为暂借时，请输入联系方式'));
     }
     if(!is_numeric($amount) || $amount==0){
@@ -188,21 +189,46 @@ function bills_billing_form_validate($form, &$form_state) {
 }
 
 function bills_billing_form_submit($form, &$form_state) {
-//    $name = $form_state['values']['bills_billing_name'];
-//    $value[] = array(
-//        'billing_name' => $name,
-//    );
-//    $fields = array('billing_name');
-//
-//    $query = db_insert('bills_billing')->fields($fields)->values($value);
-//
-//    try {
-//        $result = $query->execute();
-//        drupal_set_message(t("票据类型录入成功"));
-//    } catch (Exception $e) {
-//        dd($e);
-//        drupal_set_message('票据类型录入失败，请联系管理员', 'error');
-//    }
+    $bills_no = $form_state['values']['billing_no'];
+    $billing_fee = $form_state['values']['billing_fee'];
+    $billing_number = $form_state['values']['billing_number'];
+    $billing_amount = $form_state['values']['billing_amount'];
+    $billing_method = $form_state['values']['billing_method'];
+    $billing_contact = $form_state['values']['billing_contact'];
+    $billing_comment = $form_state['values']['billing_comment'];
+
+
+    global $user;
+    $value[] = array(
+        'bills_no' => $bills_no,
+        'fee_name' => $billing_fee,
+        'number' => $billing_number,
+        'amount' => $billing_amount,
+        'payment_method' => $billing_method,
+        'contact' => $billing_contact,
+        'comments' => $billing_comment,
+        'update_date' => time(),
+    );
+    $fields = array('bills_no','fee_name','number','amount','payment_method','contact','comments','update_date');
+
+    $query = db_insert('bills_billing')->fields($fields)->values($value);
+    $update_query = db_update('bills')
+      ->fields(array(
+        'distribution_uid' => $user->uid,
+        'status' => '已开具',
+        'amount' => $billing_amount,
+      ))
+      ->condition('billsno', $bills_no, '=');
+    try {
+        $transaction = db_transaction();
+        $query->execute();
+        $update_query->execute();
+        drupal_set_message(t("票据开具成功"));
+    } catch (Exception $e) {
+        $transaction->rollback();
+        watchdog_exception('billing error', $e);
+        drupal_set_message('票据开具失败，请联系管理员', 'error');
+    }
 }
 
 function get_billingable_bills_type(){

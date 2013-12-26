@@ -1,7 +1,5 @@
 <?php
-
-
-function bills_distribution_form($form, &$form_state) {
+function bills_handin_form($form, &$form_state) {
     $header = array(
         'billsno' => t('票据编号'),
         'type' => t('票据类型'),
@@ -13,9 +11,11 @@ function bills_distribution_form($form, &$form_state) {
 
     $fields = array('billsno', 'type', 'status', 'amount');
 
+    global $user;
     $query->fields('b', $fields);
     $str_query = $query
-                    ->condition('b.status', '可用', '=')
+                    ->condition('b.status', '已开具', '=')
+                    ->condition('b.distribution_uid', $user->uid, '=')
                     ->limit(10)
                     ->orderBy('b.billsno');
     $result = $str_query->execute();
@@ -33,7 +33,7 @@ function bills_distribution_form($form, &$form_state) {
 
     $form['description'] = array(
         '#type' => 'item',
-        '#title' => t("票据分配"),
+        '#title' => t("票据缴销"),
     );
 
     $form['table'] = array(
@@ -45,12 +45,6 @@ function bills_distribution_form($form, &$form_state) {
 
     $form['pager'] = array('#markup' => theme('pager'));
 
-    $form['distribution_uid'] = array(
-        '#type' => 'select',
-        '#required' => TRUE,
-        '#options' => get_billing_users(),
-        '#title' => t('分发给开票员：'),
-    );
 
      $form['submit'] = array(
         '#type' => 'submit',
@@ -61,22 +55,8 @@ function bills_distribution_form($form, &$form_state) {
     return $form;
 }
 
-function get_billing_users(){
-    $result = db_query('select u.uid,u.name from users u
-    join users_roles ur on u.uid = ur.uid
-    join role r on ur.rid = r.rid and r.name = :rolename',
-    array(':rolename' => '开票员'))->fetchAll();
 
-    $users = array();
-
-    foreach($result as $user){
-        $users[$user->uid] = $user->name;
-    }
-    return $users;
-}
-
-
-function bills_distribution_form_validate($form, &$form_state) {
+function bills_handin_form_validate($form, &$form_state) {
    $table = $form_state['values']['table'] ;
    $rst = 0;
    foreach($table as $row){
@@ -86,12 +66,11 @@ function bills_distribution_form_validate($form, &$form_state) {
        }
    }
    if($rst == 0)
-       form_set_error('', t('请选择需要分配的票据编号.'));
+       form_set_error('', t('请选择需要缴销的票据编号.'));
 }
 
-function bills_distribution_form_submit($form, &$form_state) {
-    $uid = $form_state['values']['distribution_uid'];
-    $table = $form_state['values']['table'] ;
+function bills_handin_form_submit($form, &$form_state) {
+   $table = $form_state['values']['table'] ;
 
    $bill_nos = array();
    foreach($table as $row){
@@ -99,18 +78,18 @@ function bills_distribution_form_submit($form, &$form_state) {
            $bill_nos[] =$row;
        }
    }
-
+  global $user;
     $query = db_update('bills')
       ->fields(array(
-        'distribution_uid' => $uid,
-        'status' => '已分配',
+        'distribution_uid' => $user->uid,
+        'status' => '已缴销',
       ))
       ->condition('billsno', $bill_nos, 'in');
     try {
         $result = $query->execute();
-        drupal_set_message(t("票据分配成功"));
+        drupal_set_message(t("票据缴销成功"));
     } catch (Exception $e) {
-        watchdog_exception('bills distribution error', $e);
-        drupal_set_message('票据分配失败，请联系管理员', 'error');
+        watchdog_exception('bills handin error', $e);
+        drupal_set_message('票据缴销失败，请联系管理员', 'error');
     }
 }
