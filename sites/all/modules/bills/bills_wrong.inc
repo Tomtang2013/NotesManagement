@@ -75,8 +75,10 @@ function bills_wrong_form_submit($form, &$form_state) {
         'status' => '已报错',
       ))
       ->condition('billsno', $bills_no, '=');
+    global $user;
     try {
         $result = $query->execute();
+        bills_log_write_one($bill_no,$user->uid,'报错');
         drupal_set_message(t("票据报错成功"));
     } catch (Exception $e) {
         drupal_set_message('票据报错失败，请联系管理员', 'error');

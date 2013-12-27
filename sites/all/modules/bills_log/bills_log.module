@@ -1,0 +1,234 @@
+<?php
+
+// $Id: bills_log.info,v 1.4 2011/07/04 13:25:57 dries Exp $
+
+/**
+ * Implementation of hook_init
+ */
+function bills_log_init() {
+
+}
+
+/**
+ * Implements hook_help().
+ */
+function bills_log_help($path, $arg) {
+    switch ($path) {
+        case 'admin/help#bills_log':
+            $output = '<h3>' . t('About') . '</h3>';
+            $output .= '<p>' . t('票据管理日志');
+            return $output;
+    }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function bills_log_permission() {
+    return array(
+        'bills_log' => array(
+            'title' => t('票据管理日志'),
+        ),
+    );
+}
+
+function bills_log_menu() {
+    $items = array();
+    $items['billslog'] = array(
+        'title' => t('票据管理日志'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('bills_log_form'),
+        'access arguments' => array('bills_log'),
+        'weight' => 0,
+    );
+
+    return $items;
+}
+
+function bills_log_form($form, &$form_state) {
+    $header = array(
+        'opt_bills_no' => t('票据编号'),
+        'u_name' => t('操作人'),
+        'opt_type' => t('操作类型'),
+        'uu_name' => t('接收人'),
+        'opt_date' => t('操作日期'),
+       
+    );
+    $query = db_select('bills_log', 'bl')
+                    ->extend('PagerDefault');
+
+    $fields = array('opt_bills_no', 'opt_type', 'opt_date');
+
+    global $user;
+
+    $query->fields('bl', $fields);
+    $query->addField('u', 'name');
+    $query->addField('uu', 'name');
+    $query->leftJoin('users', 'u', 'u.uid = bl.opt_uid');
+    $query->leftJoin('users', 'uu', 'uu.uid = bl.opt_re_uid');
+
+    $query->limit(10)
+            ->orderBy('bl.opt_id');
+    
+    $query = _set_condition($query,$form_state);
+    $str_query = $query;
+    $result = $str_query->execute();
+
+    $rows = array();
+    foreach ($result as $row) {
+        $rows[] = array(
+            'opt_bills_no' => $row->opt_bills_no,
+             'u_name' => $row->name,
+            'opt_type' => $row->opt_type,
+            'uu_name' => $row->uu_name,
+            'opt_date' => empty($row->opt_date) ? '' : date("Y-m-d", $row->opt_date),
+        );
+    }
+    
+    $form = array();
+    $form['search_box'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('管理日志'),
+        '#collapsible' => TRUE,
+        '#collapsed' => FALSE,
+    );
+
+    $form['search_box']['bills_no_start'] = array(
+        '#type' => 'textfield',
+        '#size' => 20,
+        '#title' => t('起始编号'),
+        '#prefix' => '<div id="first_line">',
+        
+    );
+
+    $form['search_box']['bills_no_end'] = array(
+        '#type' => 'textfield',
+        '#size' => 20,
+        '#title' => t('截止编号'),
+    );
+
+    $form['search_box']['opt_user'] = array(
+        '#type' => 'textfield',
+        '#size' => 20,
+        '#title' => t('操作员'),
+        '#suffix' => '</div >',
+    );
+
+
+    $form['search_box']['opt_type'] = array(
+        '#type' => 'select',
+        '#options' => array(''=>' - 选择 -','分配'=>'分配','开票'=>'开票',
+                            '废票'=>'废票','退票'=>'退票','退票确认'=>'退票确认',
+                            '缴销'=>'缴销','缴销确认'=>'缴销确认','结报'=>'结报',),
+        '#title' => t('操作类型'),
+         '#prefix' => '<div id="sec_line">',
+    );
+
+    $form['search_box']['opt_date'] = array(
+        '#type' => 'datepicker',
+        '#date_format' => 'd/m/Y',
+        '#maxlength' => '10',
+        '#title' => t('操作日期'),
+        '#suffix' => '</div >',
+    );
+
+    $form['button'] = array(
+        '#type' => 'submit',
+        '#value' => '清空检索志区',
+    );
+    
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => '提交',
+        '#suffix' => '<hr />'
+    );
+
+    $form['table'] = array(
+        '#theme' => 'table',
+        '#header' => $header,
+        '#rows' => $rows,
+    );
+
+    $form['pager'] = array('#markup' => theme('pager'));
+
+    return $form;
+}
+
+function _set_condition($query,$form_state){
+   $query = _get_form_value($query,$form_state,'bills_no_start','bl.opt_bills_no','>=');
+   $query = _get_form_value($query,$form_state,'bills_no_end','bl.opt_bills_no','<=');
+   $query = _get_form_value($query,$form_state,'opt_user','u.name');
+   $query = _get_form_value($query,$form_state,'opt_type','bl.type');
+   $query = _get_form_value($query,$form_state,'opt_date','bl.opt_date');
+
+   return $query;
+}
+
+function _get_form_value($query,$form_state,$key,$field,$op = '='){
+     $value = '';
+     if(!empty($form_state['values'][$key])){
+         $value = $form_state['values'][$key];
+         $query->condition($field,$value,$op);
+     }
+     return $query;
+}
+
+function bills_log_form_validate($form, &$form_state) {
+     if($form_state['values']['op'] == '清空管理日志区')
+         return;
+    $start = $form_state['values']['bills_no_start'];
+    $end = $form_state['values']['bills_no_end'];
+    $no_error = false;
+    if (!empty($start) && !is_int($start) && $start+0==0 ){
+         form_set_error('bills_no_start', t('起始编号必须是数字.'));
+         $no_error = true;
+    }
+       
+    if (!empty($end) &&!is_int($end)&& $end+0==0 ){
+        form_set_error('bills_no_end', t('结束编号必须是数字.'));
+        $no_error = true;
+    }
+        
+    if ($no_error ==false && $start > $end) {
+        form_set_error('bills_no_start', t('结束编号不能小于起始编号。'));
+    }
+}
+
+function bills_log_form_submit($form, &$form_state) {
+    if($form_state['values']['op'] == '清空检索区')
+         return;
+    $form_state['rebuild'] = TRUE;
+}
+
+
+function bills_log_write_array($bills_nos,$uid,$opt,$opt_re_uid = null){
+    $values = array();
+    foreach ($bills_nos as $bills_no) {
+        $values[] = array(
+            'opt_bills_no' => $bills_no,
+            'opt_uid' => $uid,
+            'opt_type' => $opt,
+            'opt_re_uid' => $opt_re_uid,
+            'opt_date' => time(),
+        );
+    }
+    $fields = array('opt_bills_no', 'opt_uid', 'opt_type', 'opt_re_uid','opt_date');
+
+    $query = db_insert('bills_log')->fields($fields);
+    foreach ($values as $record) {
+        $query->values($record);
+    }
+    $query->execute();
+}
+
+function bills_log_write_row($bills_no, $uid, $opt,$opt_re_uid = null){
+    db_insert('bills_log')
+            ->fields(array(
+                'opt_bills_no' => $bills_no,
+                'opt_uid' => $uid,
+                'opt_type' => $opt,
+                'opt_re_uid' => $opt_re_uid,
+                'opt_date' => time(),
+            ))->execute();
+//    drupal_write_record('page_manager_handlers', $handler, 'opt_id');
+}

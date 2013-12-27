@@ -1,0 +1,10 @@
+name = Bills log
+description = 票据管理日志.
+core = 7.x
+
+package = Bills Management
+
+version = "7.x-1.0"
+core = "7.x"
+project = "bills_log"
+datestamp = "1386406401"

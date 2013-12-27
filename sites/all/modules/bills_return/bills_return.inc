@@ -87,6 +87,7 @@ function bills_return_form_submit($form, &$form_state) {
       ->condition('billsno', $bill_nos, 'in');
     try {
         $result = $query->execute();
+        bills_log_write_array($bill_nos,$user->uid,'退票');
         drupal_set_message(t("票据退回成功"));
     } catch (Exception $e) {
         watchdog_exception('bills return error', $e);

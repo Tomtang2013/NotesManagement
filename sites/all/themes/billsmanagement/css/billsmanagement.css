@@ -10,6 +10,29 @@ hr{
     clear:none;
 }
 
+.bills-search .form-item{
+    float: left;
+    display: inline-block;
+    width: 220px;
+}
+.bills-search .container-inline-date{
+    display: inline-block;
+    width: 200px;
+}
+
+.bills-search .form-item-bills-type{
+    clear:both;
+}
+.bills-search .form-item-amount,.form-item-fee-name {
+    margin-top: 0px;
+}
+.bills-search .form-type-select{
+    margin-top: -1px;
+}
+.bills-search select{
+    width: 162px;
+}
+
 .item-list .pager{
      clear:none;
 }

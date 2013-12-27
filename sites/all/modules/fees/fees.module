@@ -38,7 +38,7 @@ function fees_menu() {
         'title' => t('收费项目'),
         'page callback' => 'fees_status_page_call_back',
         'access arguments' => array('fees'),
-        'weight' => 0,
+        'weight' => 5,
     );
     return $items;
 }

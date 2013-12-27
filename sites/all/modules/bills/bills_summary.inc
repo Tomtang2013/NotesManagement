@@ -87,6 +87,7 @@ function bills_summary_form_submit($form, &$form_state) {
       ->condition('billsno', $bill_nos, 'in');
     try {
         $result = $query->execute();
+        bills_log_write_array($bill_nos,$uid,'结报');
         drupal_set_message(t("票据结报成功"));
     } catch (Exception $e) {
         drupal_set_message('票据结报失败，请联系管理员', 'error');

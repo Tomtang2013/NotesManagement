@@ -39,7 +39,7 @@ function bills_borrow_menu() {
         'page callback' => 'drupal_get_form',
         'page arguments' => array('bills_borrow_form'),
         'access arguments' => array('bills_borrow'),
-        'weight' => 0,
+        'weight' => 50,
     );
 
     return $items;

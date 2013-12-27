@@ -76,7 +76,7 @@ function bills_return_check_form_submit($form, &$form_state) {
            $bill_nos[] =$row;
        }
    }
-
+global $user;
     $query = db_update('bills')
       ->fields(array(
         'status' => '可用',
@@ -85,6 +85,7 @@ function bills_return_check_form_submit($form, &$form_state) {
       ->condition('billsno', $bill_nos, 'in');
     try {
         $result = $query->execute();
+        bills_log_write_array($bill_nos,$user->uid,'退票确认');
         drupal_set_message(t("票据退回确认成功"));
     } catch (Exception $e) {
         drupal_set_message('票据退回确认失败，请联系管理员', 'error');

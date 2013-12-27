@@ -47,7 +47,7 @@ function bills_menu() {
         'page arguments' => array('bills_distribution_form'),
         'access arguments' => array('bills_distribution'),
         'file' => 'bills_distribution.inc',
-        'weight' => 0,
+        'weight' => 10,
     );
 
     $items['billssummary'] = array(
@@ -56,7 +56,7 @@ function bills_menu() {
         'page arguments' => array('bills_summary_form'),
         'access arguments' => array('bills_summary'),
         'file' => 'bills_summary.inc',
-        'weight' => 0,
+        'weight' => 20,
     );
 
     $items['billswrong'] = array(
@@ -65,7 +65,7 @@ function bills_menu() {
         'page arguments' => array('bills_wrong_form'),
         'access arguments' => array('bills_wrong'),
         'file' => 'bills_wrong.inc',
-        'weight' => 0,
+        'weight' => 30,
     );
 
     $items['billsdisable'] = array(
@@ -74,7 +74,7 @@ function bills_menu() {
         'page arguments' => array('bills_disable_form'),
         'access arguments' => array('bills_disable'),
         'file' => 'bills_disable.inc',
-        'weight' => 0,
+        'weight' => 40,
     );
 
 

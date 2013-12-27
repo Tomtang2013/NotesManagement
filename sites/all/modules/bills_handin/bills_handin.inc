@@ -87,6 +87,7 @@ function bills_handin_form_submit($form, &$form_state) {
       ->condition('billsno', $bill_nos, 'in');
     try {
         $result = $query->execute();
+        bills_log_write_array($bill_nos,$user->uid,'缴销');
         drupal_set_message(t("票据缴销成功"));
     } catch (Exception $e) {
         watchdog_exception('bills handin error', $e);

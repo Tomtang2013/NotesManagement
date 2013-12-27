@@ -72,10 +72,13 @@ function bills_disable_form_submit($form, &$form_state) {
         'status' => '已作废',
       ))
       ->condition('billsno', $bill_no, '=');
+    global $user;
     try {
         $result = $query->execute();
+        bills_log_write_row($bill_no,$user->uid,'作废');
         drupal_set_message(t("票据作废成功"));
     } catch (Exception $e) {
+        watchdog_exception('bills disable error', $e);
         drupal_set_message('票据作废失败，请联系管理员', 'error');
     }
 }

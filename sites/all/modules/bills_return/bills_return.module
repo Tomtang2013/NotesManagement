@@ -41,7 +41,7 @@ function bills_return_menu() {
         'access arguments' => array('bills_return'),
         'file' => 'bills_return.inc',
         'access arguments' => array('bills_return'),
-        'weight' => 0,
+        'weight' => 90,
     );
 
     $items['billsreturncheck'] = array(
@@ -51,7 +51,7 @@ function bills_return_menu() {
         'access arguments' => array('bills_return'),
         'file' => 'bills_return_check.inc',
         'access arguments' => array('bills_return'),
-        'weight' => 0,
+        'weight' => 100,
     );
 
     return $items;

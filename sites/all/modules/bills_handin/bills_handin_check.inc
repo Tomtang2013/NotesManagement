@@ -76,7 +76,7 @@ function bills_handin_check_form_submit($form, &$form_state) {
            $bill_nos[] =$row;
        }
    }
-
+   global $user;
     $query = db_update('bills')
       ->fields(array(
         'report_date' => time(),
@@ -85,6 +85,7 @@ function bills_handin_check_form_submit($form, &$form_state) {
       ->condition('billsno', $bill_nos, 'in');
     try {
         $result = $query->execute();
+        bills_log_write_array($bill_nos,$user->uid,'缴销确认');
         drupal_set_message(t("票据缴销确认成功"));
     } catch (Exception $e) {
         drupal_set_message('票据缴销确认失败，请联系管理员', 'error');

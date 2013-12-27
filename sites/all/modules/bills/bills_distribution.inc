@@ -92,7 +92,7 @@ function bills_distribution_form_validate($form, &$form_state) {
 function bills_distribution_form_submit($form, &$form_state) {
     $uid = $form_state['values']['distribution_uid'];
     $table = $form_state['values']['table'] ;
-
+    
    $bill_nos = array();
    foreach($table as $row){
        if($row > 0){
@@ -106,8 +106,10 @@ function bills_distribution_form_submit($form, &$form_state) {
         'status' => '已分配',
       ))
       ->condition('billsno', $bill_nos, 'in');
+    global $user;
     try {
         $result = $query->execute();
+        bills_log_write_array($bill_nos,$user->uid,'分配',$uid);
         drupal_set_message(t("票据分配成功"));
     } catch (Exception $e) {
         watchdog_exception('bills distribution error', $e);

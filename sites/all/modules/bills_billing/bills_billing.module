@@ -39,7 +39,7 @@ function bills_billing_menu() {
         'page callback' => 'drupal_get_form',
         'page arguments' => array('bills_billing_form'),
         'access arguments' => array('bills_billing'),
-        'weight' => 0,
+        'weight' => 60,
     );
 
     $items['billing/fee_name_autocomplete'] = array(
@@ -234,6 +234,7 @@ function bills_billing_form_submit($form, &$form_state) {
         $transaction = db_transaction();
         $query->execute();
         $update_query->execute();
+        bills_log_write_row($bills_no,$user->uid,'开具');
         drupal_set_message(t("票据开具成功"));
     } catch (Exception $e) {
         $transaction->rollback();

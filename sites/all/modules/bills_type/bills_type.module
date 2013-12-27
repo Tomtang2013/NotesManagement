@@ -38,7 +38,7 @@ function bills_type_menu() {
         'title' => t('票据类型管理'),
         'page callback' => 'bills_type_page_call_back',
         'access arguments' => array('bills_type'),
-        'weight' => 0,
+        'weight' => 8,
     );
     return $items;
 }
@@ -129,6 +129,8 @@ function get_bills_type(){
     $result = $query->orderBy('b.type_id')
                     ->execute();
     $rows = array();
+    $rows = array( '' => ' - 选择 - ',);
+
     foreach ($result as $row) {
         $rows[$row->type_name] = $row->type_name;
     }

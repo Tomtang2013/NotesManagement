@@ -1,0 +1,5 @@
+Truncate table bills;
+Truncate table  bills_billing;
+Truncate table  bills_log;
+Truncate table  bills_type;
+Truncate table  fees;

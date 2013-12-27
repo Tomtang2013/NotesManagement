@@ -41,7 +41,7 @@ function bills_handin_menu() {
         'access arguments' => array('bills_handin'),
         'file' => 'bills_handin.inc',
         'access arguments' => array('bills_handin'),
-        'weight' => 0,
+        'weight' => 70,
     );
 
     $items['billshandincheck'] = array(
@@ -51,7 +51,7 @@ function bills_handin_menu() {
         'access arguments' => array('bills_handin'),
         'file' => 'bills_handin_check.inc',
         'access arguments' => array('bills_handin'),
-        'weight' => 0,
+        'weight' => 80,
     );
 
     return $items;
