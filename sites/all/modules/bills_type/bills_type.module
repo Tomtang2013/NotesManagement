@@ -36,91 +36,33 @@ function bills_type_menu() {
     $items = array();
     $items['billstype'] = array(
         'title' => t('票据类型管理'),
-        'page callback' => 'bills_type_page_call_back',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('bills_type_create_form'),
         'access arguments' => array('bills_type'),
+        'file' => 'bills_type_create.inc',
+        'weight' => 8,
+    );
+
+    $items['billstype/%/delete'] = array(
+        'title' => t('票据类型管理'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('bills_type_delete_form',1),
+        'access arguments' => array('bills_type'),
+        'file' => 'bills_type_delete.inc',
+        'weight' => 8,
+    );
+
+    $items['billstype/%/update'] = array(
+        'title' => t('票据类型管理'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('bills_type_update_form',1),
+        'access arguments' => array('bills_type'),
+        'file' => 'bills_type_update.inc',
         'weight' => 8,
     );
     return $items;
 }
 
-function bills_type_page_call_back() {
-    $header = array(
-        array('data' => t('票据类型编号'), 'field' => 'b.type_id'),
-        array('data' => t('票据类型名称'), 'field' => 'b.type_name'),
-    );
-
-    $query = db_select('bills_type', 'b')
-                    ->extend('PagerDefault');
-
-    $fields = array('type_id', 'type_name');
-
-    $query->fields('b', $fields);
-    $result = $query
-                    ->limit(10)
-                    ->orderBy('b.type_id')
-                    ->execute();
-
-    $rows = array();
-    foreach ($result as $row) {
-        $rows[] = array('data' => (array) $row);
-    }
-
-    $build['tablesort_table'] = array(
-        '#theme' => 'table',
-        '#header' => $header,
-        '#rows' => $rows,
-    );
-
-    $build['pager_pager'] = array('#theme' => 'pager');
-
-    $pagecontent = drupal_render($build);
-    $pagecontent .= "<hr/>";
-    $pagecontent .= drupal_render(drupal_get_form("bills_type_create_form"));
-
-    return $pagecontent;
-}
-
-function bills_type_create_form($form, &$form_state) {
-    $form['description'] = array(
-        '#type' => 'item',
-        '#title' => t("票据类型录入"),
-    );
-    // This is the first form element. It's a textfield with a label, "Name"
-    $form['bills_type_name'] = array(
-        '#type' => 'textfield',
-        '#size' => '20',
-        '#required' => TRUE,
-        '#maxlength' => '10',
-        '#title' => t('票据类型'),
-    );
-
-    $form['submit'] = array(
-        '#type' => 'submit',
-        '#value' => '提交',
-    );
-    return $form;
-}
-
-function bills_type_create_form_validate($form, &$form_state) {
-
-}
-
-function bills_type_create_form_submit($form, &$form_state) {
-    $name = $form_state['values']['bills_type_name'];
-    $value[] = array(
-        'type_name' => $name,
-    );
-    $fields = array('type_name');
-
-    $query = db_insert('bills_type')->fields($fields)->values($value);
-
-    try {
-        $result = $query->execute();
-        drupal_set_message(t("票据类型录入成功"));
-    } catch (Exception $e) {
-        drupal_set_message('票据类型录入失败，请联系管理员', 'error');
-    }
-}
 
 function get_bills_type(){
     $fields = array('type_id', 'type_name');
@@ -135,4 +77,48 @@ function get_bills_type(){
         $rows[$row->type_name] = $row->type_name;
     }
     return $rows;
+}
+
+
+function get_type_name_by_id($type_id){
+    $type_name = db_select('bills_type')->fields('bills_type',array('type_name'))
+        ->condition('type_id', $type_id)
+        ->execute()->fetchField();
+    return $type_name;
+}
+
+function is_have_bills($type_name){
+   $type = db_select('bills')->fields('bills')
+        ->condition('type', $type_name)
+        ->execute()->fetchField();
+   return $type;
+}
+
+function get_type_useful($type_id){
+    $fields = array('typeuseful_id', 'userf_name');
+    $query = db_select('bills_type_useful', 'btu');
+    $query->fields('btu', $fields);
+    $result = $query
+                    ->condition('type_id', $type_id)
+                    ->orderBy('btu.typeuseful_id')
+                    ->execute();
+    $rows = array();
+     foreach ($result as $row) {
+        $rows[$row->typeuseful_id] = $row->userf_name;
+    }
+
+    if(count($rows) == 0){
+        $rows[0] = '';
+    }
+    return $rows;
+}
+
+function type_name_is_exist($type_name, $type_id = -1) {
+    $query = db_select('bills_type')->fields('bills_type', array('type_name'))
+                    ->condition('type_name', $type_name, '=');
+    if ($type_id != -1) {
+        $query->condition('type_id', $type_id, '!=');
+    }
+    $type_name = $query->execute()->fetchField();
+    return $type_name;
 }

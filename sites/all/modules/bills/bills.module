@@ -16,7 +16,7 @@ function bills_help($path, $arg) {
     switch ($path) {
         case 'admin/help#bills':
             $output = '<h3>' . t('About') . '</h3>';
-            $output .= '<p>' . t('票据管理');
+            $output .= '<p>' . t('入库管理');
             return $output;
     }
 }
@@ -27,7 +27,7 @@ function bills_help($path, $arg) {
 function bills_permission() {
     return array(
         'bills' => array(
-            'title' => t('票据管理'),
+            'title' => t('入库管理'),
         ),
     );
 }
@@ -35,8 +35,9 @@ function bills_permission() {
 function bills_menu() {
     $items = array();
     $items['bills'] = array(
-        'title' => t('票据管理'),
-        'page callback' => 'bills_status_page_call_back',
+        'title' => t('入库管理'),
+       'page callback' => 'drupal_get_form',
+        'page arguments' => array('bills_create_form'),
         'access arguments' => array('bills'),
         'weight' => 0,
     );
@@ -90,6 +91,22 @@ function bills_status_page_call_back() {
 }
 
 function bills_create_form($form, &$form_state) {
+
+    $header = array(
+        'type_name' => t('票据编号段'),
+        'opt_update' => t('票据类型'),
+        'opt_delete' => t('录入时间'),
+    );
+
+    $form = array();
+//    $form['#tree'] = TRUE;
+    $form['table'] = array(
+        '#theme' => 'table',
+        '#header' => $header,
+        '#rows' => bills_list_row(),
+    );
+    $form['pager'] = array('#markup' => theme('pager'));
+    
     $form['description'] = array(
         '#type' => 'item',
         '#title' => t("票据录入"),
@@ -128,9 +145,9 @@ function bills_create_form($form, &$form_state) {
 function bills_create_form_validate($form, &$form_state) {
     $start = $form_state['values']['billsno_start'] + 0;
     $end = $form_state['values']['billsno_end'] + 0;
-    if (!is_int($start) || $start==0)
+    if (!is_int($start) || $start<=0)
         form_set_error('billsno_start', t('起始票据编号必须是数字.'));
-    if (!is_int($end) || $end==0)
+    if (!is_int($end) || $end<=0)
         form_set_error('billsno_end', t('结束票据编号必须是数字.'));
     if ($start > $end) {
         form_set_error('billsno_end', t('结束票据编号不能小于起始票据编号。'));
@@ -143,7 +160,7 @@ function bills_create_form_submit($form, &$form_state) {
     $type = $form_state['values']['billsno_type'];
     $amount = 0;
     $values = array();
-    for ($i = $start; $i < $end; $i++) {
+    for ($i = $start; $i <= $end; $i++) {
         $values[] = array(
             'billsno' => $i,
             'type' => $type,
@@ -169,43 +186,22 @@ function bills_create_form_submit($form, &$form_state) {
     }
 }
 
-function bills_list($hasOpt = false) {
-    $header = array(
-        array('data' => t('票据编号'), 'field' => 'b.billsno'),
-        array('data' => t('票据类型'), 'field' => 'b.type'),
-        array('data' => t('票据状态'), 'field' => 'b.status'),
-        array('data' => t('票据金额'), 'field' => 'b.amount'),
-    );
+function bills_list_row() {
 
-    $query = db_select('bills', 'b')
-                    ->extend('PagerDefault');
+    $query = db_query("select concat(min(billsno),'~',max(billsno)) as nos,type,createdate
+                        from bills b
+                        group by createdate");
 
-    $fields = array('billsno', 'type', 'status', 'amount');
-
-    if ($hasOpt) {
-        $header[] = array('data' => t('操作'), 'field' => 'opt');
-    }
-
-    $query->fields('b', $fields);
-    $result = $query
-                    ->limit(10)
-                    ->orderBy('b.billsno')
-                    ->execute();
+    $result = $query->fetchAll();
 
     $rows = array();
     foreach ($result as $row) {
-        if ($hasOpt) {
-            $row->opt = l('选中', 'www.google.cn');
-        }
-        $rows[] = array('data' => (array) $row);
+        $rows[] = array(
+            'nos' => $row->nos,
+             'type'=>  $row->type,
+             'createdate' => empty($row->createdate) ? '' : date("Y-m-d", $row->createdate),
+        );
     }
-
-    $build['tablesort_table'] = array(
-        '#theme' => 'table',
-        '#header' => $header,
-        '#rows' => $rows,
-    );
-
-    $build['pager_pager'] = array('#theme' => 'pager');
-    return $build;
+   
+    return $rows;
 }
