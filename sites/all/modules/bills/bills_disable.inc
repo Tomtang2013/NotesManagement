@@ -1,49 +1,20 @@
 <?php
 
-
 function bills_disable_form($form, &$form_state) {
-    $header = array(
-        'billsno' => t('票据编号'),
-        'type' => t('票据类型'),
-        'status' => t('票据状态'),
-        'amount' => t('票据金额'),
-    );
-    $query = db_select('bills', 'b')
-                    ->extend('PagerDefault');
-
-    $fields = array('billsno', 'type', 'status', 'amount');
-
-    $query->fields('b', $fields);
-    $str_query = $query
-                    ->condition('b.status', '可用', '=')
-                    ->limit(10)
-                    ->orderBy('b.billsno');
-    $result = $str_query->execute();
-
-    $rows = array();
-    foreach ($result as $row) {
-        $rows[$row->billsno] = array(
-            'billsno' => $row->billsno,
-            'type' => $row->type,
-            'status' => $row->status,
-            'amount' => $row->amount,
-        );
-    }
     $form = array();
 
     $form['description'] = array(
         '#type' => 'item',
-        '#title' => t("废票处理"),
+        '#title' => t("错票处理"),
     );
 
-    $form['table'] = array(
-        '#type' => 'tableselect',
-        '#header' => $header,
-        '#options' => $rows,
-        '#multiple' => FALSE,
+     $form['bills_no'] = array(
+        '#type' => 'textfield',
+        '#title' => t("废票号"),
+        '#required' => TRUE,
+        '#autocomplete_path' => 'bills/billsno_disable_autocomplete',
     );
 
-    $form['pager'] = array('#markup' => theme('pager'));
 
 
      $form['submit'] = array(
@@ -57,14 +28,15 @@ function bills_disable_form($form, &$form_state) {
 
 
 function bills_disable_form_validate($form, &$form_state) {
-   $value = $form_state['values']['table'] ;
-   
-   if(empty($value))
-       form_set_error('', t('请选择需作废的票据编号.'));
+    $bills_no = $form_state['values']['bills_no'] ;
+    if( is_no_exist($bills_no)){
+        form_set_error('bills_no', t('该编号不存在。'));
+    }
+
 }
 
 function bills_disable_form_submit($form, &$form_state) {
-    $bill_no = $form_state['values']['table'] ;
+    $bill_no = $form_state['values']['bills_no'] ;
 
     $query = db_update('bills')
       ->fields(array(

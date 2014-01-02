@@ -62,7 +62,7 @@ hr{
 }
 
 .pr_content .pr_content_left {
-    width: 200px;
+    width: 150px;
     float: left;
 }
 
@@ -70,7 +70,7 @@ hr{
     width: 716px;
     border-left:1px solid #EEEEEE;
     min-height:500px;
-    margin-left: 203px;
+    margin-left: 163px;
 }
 .pr_footer {
 /*    height: 25px;*/
@@ -359,4 +359,25 @@ table .odd{
 
 html.js input.form-autocomplete{
     background-position: 100% 6px;  
+}
+
+/*********************************************/
+.bills-billing-form-item{
+  display: inline-block;
+  width:100%;
+}
+
+.billing-item{
+     float:left;
+     padding-right: 30px;
+}
+
+
+.bills-billing-table{
+    width: 100%;
+    margin-top: 15px;
+}
+
+.bills-billing-form-item .error{
+    border: 2px solid red;
 }

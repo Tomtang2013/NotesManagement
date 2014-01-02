@@ -25,11 +25,20 @@ function bills_help($path, $arg) {
  * Implements hook_permission().
  */
 function bills_permission() {
-    return array(
-        'bills' => array(
-            'title' => t('入库管理'),
-        ),
+
+    $perms['bills'] = array(
+        'title' => t('入库管理'),
     );
+
+    $perms['bills_disable'] = array(
+        'title' => t('废票处理'),
+    );
+
+    $perms['bills_wrong'] = array(
+        'title' => t('错票处理'),
+    );
+
+    return $perms;
 }
 
 function bills_menu() {
@@ -73,22 +82,26 @@ function bills_menu() {
         'title' => t('废票处理'),
         'page callback' => 'drupal_get_form',
         'page arguments' => array('bills_disable_form'),
-        'access arguments' => array('bills_disable'),
+        'access arguments' =>  array('bills_disable'),
         'file' => 'bills_disable.inc',
         'weight' => 40,
     );
 
 
+    $items['bills/billsno_wrong_autocomplete'] = array(
+        'page callback' => 'billsno_wrong_autocomplete',
+        'type' => MENU_CALLBACK,
+        'access arguments' => array('bills_wrong'),
+    );
+
+    $items['bills/billsno_disable_autocomplete'] = array(
+        'page callback' => 'billsno_disable_autocomplete',
+        'type' => MENU_CALLBACK,
+        'access arguments' => array('bills_disable'),
+    );
     return $items;
 }
 
-function bills_status_page_call_back() {
-    $pagecontent = drupal_render(bills_list());
-    $pagecontent .= "<hr/>";
-    $pagecontent .= drupal_render(drupal_get_form("bills_create_form"));
-
-    return $pagecontent;
-}
 
 function bills_create_form($form, &$form_state) {
 
@@ -204,4 +217,54 @@ function bills_list_row() {
     }
    
     return $rows;
+}
+
+
+function billsno_wrong_autocomplete($string = ""){
+  $matches = array();
+  if ($string) {
+      global $user;
+      $query = db_select('bills')
+      ->fields('bills', array('billsno','type'))
+      ->condition('billsno', db_like($string) . '%', 'LIKE')
+      ->condition('status', '已开具')
+      ->condition('distribution_uid', $user->uid)
+      ->range(0, 10);
+
+     $result = $query->execute();
+
+    foreach ($result as $bill) {
+      $matches[$bill->billsno] = check_plain($bill->billsno) . "(票据类型：$bill->type)";
+    }
+  }
+
+  drupal_json_output($matches);
+}
+
+function billsno_disable_autocomplete($string = ""){
+  $matches = array();
+  if ($string) {
+      global $user;
+      
+      $query = db_select('bills')
+      ->fields('bills', array('billsno','type'))
+      ->condition('billsno', db_like($string) . '%', 'LIKE')
+      ->condition('status', '已分配')
+      ->condition('distribution_uid', $user->uid)
+      ->range(0, 10);
+     
+      $result = $query->execute();
+    foreach ($result as $bill) {
+      $matches[$bill->billsno] = check_plain($bill->billsno) . "(票据类型：$bill->type)";
+    }
+  }
+
+  drupal_json_output($matches);
+}
+
+function is_no_exist($bills_no){
+    $bills_no = db_select('bills')->fields('bills',array('billsno'))
+        ->condition('billsno', $bills_no)
+        ->execute()->fetchField();
+    return empty ($bills_no);
 }

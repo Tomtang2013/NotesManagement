@@ -2,36 +2,6 @@
 
 
 function bills_wrong_form($form, &$form_state) {
-    $header = array(
-        'billsno' => t('票据编号'),
-        'type' => t('票据类型'),
-        'status' => t('票据状态'),
-        'amount' => t('票据金额'),
-    );
-    $query = db_select('bills', 'b')
-                    ->extend('PagerDefault');
-
-    $fields = array('billsno', 'type', 'status', 'amount');
-
-    global $user;
-
-    $query->fields('b', $fields);
-    $str_query = $query
-                    ->condition('b.status', '已开具', '=')
-                    ->condition('b.distribution_uid', $user->uid, '=')
-                    ->limit(10)
-                    ->orderBy('b.billsno');
-    $result = $str_query->execute();
-
-    $rows = array();
-    foreach ($result as $row) {
-        $rows[$row->billsno] = array(
-            'billsno' => $row->billsno,
-            'type' => $row->type,
-            'status' => $row->status,
-            'amount' => $row->amount,
-        );
-    }
     $form = array();
 
     $form['description'] = array(
@@ -39,14 +9,13 @@ function bills_wrong_form($form, &$form_state) {
         '#title' => t("错票处理"),
     );
 
-    $form['table'] = array(
-        '#type' => 'tableselect',
-        '#header' => $header,
-        '#options' => $rows,
-        '#multiple' => FALSE,
+     $form['bills_no'] = array(
+        '#type' => 'textfield',
+        '#title' => t("错票号"),
+        '#required' => TRUE,
+        '#autocomplete_path' => 'bills/billsno_wrong_autocomplete',
     );
 
-    $form['pager'] = array('#markup' => theme('pager'));
 
 
      $form['submit'] = array(
@@ -60,14 +29,15 @@ function bills_wrong_form($form, &$form_state) {
 
 
 function bills_wrong_form_validate($form, &$form_state) {
-    $value = $form_state['values']['table'] ;
+    $bills_no = $form_state['values']['bills_no'] ;
+    if( is_no_exist($bills_no)){
+        form_set_error('bills_no', t('该编号不存在。'));
+    }
 
-   if(empty($value))
-       form_set_error('', t('请选择需报错的票据编号.'));
 }
 
 function bills_wrong_form_submit($form, &$form_state) {
-   $bills_no = $form_state['values']['table'] ;
+   $bills_no = $form_state['values']['bills_no'] ;
 
     $query = db_update('bills')
       ->fields(array(
@@ -78,7 +48,7 @@ function bills_wrong_form_submit($form, &$form_state) {
     global $user;
     try {
         $result = $query->execute();
-        bills_log_write_one($bill_no,$user->uid,'报错');
+        bills_log_write_row($bills_no,$user->uid,'报错');
         drupal_set_message(t("票据报错成功"));
     } catch (Exception $e) {
         drupal_set_message('票据报错失败，请联系管理员', 'error');

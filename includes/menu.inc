@@ -396,17 +396,26 @@ function menu_get_ancestors($parts) {
  *   The unserialized $data array, with path arguments replaced.
  */
 function menu_unserialize($data, $map) {
-  if ($data = unserialize($data)) {
-    foreach ($data as $k => $v) {
-      if (is_int($v)) {
-        $data[$k] = isset($map[$v]) ? $map[$v] : '';
-      }
+    if ($data = unserialize($data)) {
+//    foreach ($data as $k => $v) {
+//      if (is_int($v)) {
+//        $data[$k] = isset($map[$v]) ? $map[$v] : '';
+//      }
+//    }
+        if (is_array($data)) {
+            foreach ($data as $k => $v) { // line 258
+                if (is_int($v)) {
+                    $data[$k] = isset($map[$v]) ? $map[$v] : '';
+                }
+            }
+        } else {
+            watchdog('menu', 'menu_unserialize problem %data', array('%data' => $data), WATCHDOG_ERROR);
+            dd($data);
+        }
+        return $data;
+    } else {
+        return array();
     }
-    return $data;
-  }
-  else {
-    return array();
-  }
 }
 
 

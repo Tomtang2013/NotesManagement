@@ -113,6 +113,26 @@ function get_type_useful($type_id){
     return $rows;
 }
 
+function get_type_useful_by_name($type){
+    $fields = array('typeuseful_id', 'userf_name');
+    $query = db_select('bills_type_useful', 'btu');
+    $query->fields('btu', $fields)
+          ->leftJoin('bills_type', 'bt', 'bt.type_id = btu.type_id');
+    $result = $query 
+                    ->condition('bt.type_name', $type)
+                    ->orderBy('btu.typeuseful_id')
+                    ->execute();
+    $rows = array();
+     foreach ($result as $row) {
+        $rows[$row->userf_name] = $row->userf_name;
+    }
+
+    if(count($rows) == 0){
+        $rows[0] = '';
+    }
+    return $rows;
+}
+
 function type_name_is_exist($type_name, $type_id = -1) {
     $query = db_select('bills_type')->fields('bills_type', array('type_name'))
                     ->condition('type_name', $type_name, '=');
