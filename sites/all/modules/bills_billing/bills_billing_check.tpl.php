@@ -2,6 +2,7 @@
 global $base_path;
 $ava_no = get_ava_bills_no('支票');
 $submit_path = $base_path.'billsbillingcheck/bills_billing_submit';
+$check_auto_path = $base_path.'billsbillingcheck/bills_billing_auto';
 if(empty($ava_no)){
     $ava_no = "暂无支票可用";
 }
@@ -16,38 +17,69 @@ if(empty($ava_no)){
             var data = validate();
             var url = '<?php print $submit_path;?>';
             console.log(data);
-            if(data!=""){
+            if(data!=null){
                 jQuery.post(url, {'data':data}, function(re){
-//                    location.reload();
+                    location.reload();
                 }, 'json');
             }
         });
-        
-    });
+
+        var auto_list = null;
+        jQuery( "#edit-check-account" ).autocomplete({
+            source: function(request,response ) {
+                      var auto_path = '<?php print $check_auto_path;?>';
+                      jQuery.post(
+                             auto_path,
+                            {data: {
+                                max_row: 12,
+                                str: request.term
+                            }},
+                            function( data ) {
+                                response( jQuery.map( data, function( item ) {
+                                    auto_list = data;
+                                    return {
+                                        label: item.account + "("+ item.org+","+ item.bank+")",
+                                        value: item.account
+                                    }
+                                }));
+                                
+                                jQuery('.ui-corner-all a').one('click',function(){
+                                   var select_item = auto_list[jQuery(this).parent().index()];
+                                   jQuery('#edit-check-org').val(select_item['org']);
+                                   jQuery('#edit-check-bank').val(select_item['bank']);
+                                });
+                            },
+                            "json"
+                        );
+            }
+        });
+   });
 
     var error = null;
     function validate(){
         var no = jQuery('#edit-bills-no');
-        var money = jQuery('#edit-bills-money');
         var account = jQuery('#edit-check-account');
         var org = jQuery('#edit-check-org');
         var usefor = jQuery('#edit-check-usefor');
-
+        var bank = jQuery('#edit-check-bank');
+        var amount = jQuery('#edit-bills-money');
+        var is_filter = jQuery('#edit-check-is-filter');
+        
         error = new Array();
-        if(money.val() == '' || money.val() == null || money.val() == 0){
-            money.addClass('error');
+        if(amount.val() == '' || amount.val() == null || amount.val() == 0){
+            amount.addClass('error');
             error.push( "必须填写金额。");
          }else{
-            money.removeClass('error');
+            amount.removeClass('error');
          }
          if(no.val() ==  "暂无支票可用"){
             no.addClass('error');
             error.push( "暂无支票可用,请联系管理员。");
          }else{
-            money.removeClass('error');
+            no.removeClass('error');
          }
 
-        error = new Array();
+      
         if(error.length>0){
             jQuery('.messages').show();
             jQuery('.messages ul').empty();
@@ -56,22 +88,13 @@ if(empty($ava_no)){
             }
             return null;
         } else {
-            return {'money':money.val(),'no':no.val(),'org':org.val()
-                    ,'account':account.val(),'usefor':usefor.val()};
+            return {'no':no.val(),'org':org.val()
+                    ,'account':account.val(),'usefor':usefor.val()
+                    ,'bank':bank.val(),'amount':amount.val()
+                    ,'is_filter':is_filter.is(':checked')};
         }
     }
 
-    function check_empty(value,tarrget,title){
-         if(value == null || value == '') {
-            tarrget.addClass('error');
-            error.push( "必须填写"+title+"。");
-         } else if((title == '数量' || title == '单价')&&value == 0 ){
-            tarrget.addClass('error');
-            error.push( "必须填写"+title+"。");
-         }else{
-            tarrget.removeClass('error');
-         }
-    }
 
     function limit_money_input() {
         jQuery("input.money").bind("contextmenu", function(){
@@ -114,12 +137,12 @@ if(empty($ava_no)){
     <div class="billing-item">
         <label for="edit-bills-type">票据类型 <span class="form-required" title="此项必填。">*</span></label>
        <input type="text" id="edit-bills-type" name="bills_type" value="支票"
-               size="20" maxlength="20" class="form-text required" readonly="true">
+               size="20" maxlength="20" class="form-text required" readonly="true"/>
     </div>
     <div class="billing-item">
         <label for="edit-bills-no">可用编号 <span class="form-required" title="此项必填。">*</span></label>
         <input type="text" id="edit-bills-no" name="bills_no" value="<?php print $ava_no?>"
-               size="20" maxlength="20" class="form-text required" readonly="true">
+               size="20" maxlength="20" class="form-text required" readonly="true"/>
     </div>
     <div style="clear:both;"></div>
 </div>
@@ -130,19 +153,24 @@ if(empty($ava_no)){
         <input type="text" id="edit-check-account" name="check_account" value=""
                onKeyUp="this.value=this.value.replace(/\D/g,'')"
                onafterpaste="this.value=this.value.replace(/\D/g,'')"
-               size="40" maxlength="40" class="form-text required" >
+               size="40" maxlength="40" class="form-text " />
     </div>
     <div class="billing-item">
         <label for="edit-check-org">收款单位 </label>
         <input type="text" id="edit-check-org" name="check_org" value=""
-               size="40" maxlength="40" class="form-text required" >
+               size="40" maxlength="40" class="form-text " />
     </div>
 </div>
 <div class="bills-billing-form-item">
      <div class="billing-item">
         <label for="edit-check-bank">开户银行 </label>
         <input type="text" id="edit-check-bank" name="check_bank" value=""
-               size="40" maxlength="40" class="form-text required" >
+               size="40" maxlength="40" class="form-text " />
+     </div>
+    <div class="billing-item">
+        <label for="edit-check-is-filter">是否保存 </label>
+        <input type="checkbox" id="edit-check-is-filter" name="check_is_filter" value=""
+               class="form-text " >
     </div
     <div style="clear:both;"></div>
 </div>
@@ -152,7 +180,7 @@ if(empty($ava_no)){
      <div class="billing-item">
         <label for="edit-check-usefor">用途 </label>
         <input type="text" id="edit-check-usefor" name="check_usefor" value=""
-               size="40" maxlength="40" class="form-text required" >
+               size="40" maxlength="40" class="form-text required" />
     </div>
      <div class="billing-item">
         <label for="edit-bills-money">金额 <span class="form-required" title="此项必填。">*</span></label>

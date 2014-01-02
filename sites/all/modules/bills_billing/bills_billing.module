@@ -40,18 +40,21 @@ function bills_billing_menu() {
 //        'page arguments' => array('bills_billing_form'),
         'access arguments' => array('bills_billing'),
         'weight' => 60,
+         'file' => 'bills_billing.inc',
     );
 
     $items['billing/bills_type_change_callback'] = array(
         'page callback' => 'bills_type_change_callback',
         'type' => MENU_CALLBACK,
         'access arguments' => array('bills_billing'),
+
     );
 
     $items['billing/bills_billing_submit'] = array(
         'page callback' => 'bills_billing_submit',
         'type' => MENU_CALLBACK,
         'access arguments' => array('bills_billing'),
+        'file' => 'bills_billing.inc',
     );
 
     $items['billsbillingcheck'] = array(
@@ -59,83 +62,26 @@ function bills_billing_menu() {
         'page callback' => 'bills_billing_check_callback',
 //        'page arguments' => array('bills_billing_form'),
         'access arguments' => array('bills_billing'),
+        'file' => 'bills_billing_check.inc',
         'weight' => 60,
     );
 
+    $items['billsbillingcheck/bills_billing_auto'] = array(
+        'page callback' => 'bills_billing_check_auto',
+        'type' => MENU_CALLBACK,
+        'access arguments' => array('bills_billing'),
+         'file' => 'bills_billing_check.inc',
+    );
+    
     $items['billsbillingcheck/bills_billing_submit'] = array(
         'page callback' => 'bills_billing_check_submit',
         'type' => MENU_CALLBACK,
         'access arguments' => array('bills_billing'),
+         'file' => 'bills_billing_check.inc',
     );
     
 
     return $items;
-}
-
-function bills_billing_check_callback(){
-    $page_content = '';
-    $page_content .= theme('bills_billing_check');
-    return $page_content;
-}
-
-function bills_billing_check_submit(){
-    $data = $_POST['data'];
-    $bills_no = $data['no'];
-    $org = $data['org'];
-    $account = $data['account'];
-    $usefor = $data['usefor'];
-    $money = $data['money'];
-
-     global $user;
-    $amount = 0;
-    $usf_fields = array('bills_no','payment_content','number','unit_price');
-    $query_usf = db_insert('bills_billing_detail')->fields($usf_fields);
-
-    foreach ($usfs as $usf) {
-        $query_usf->values(array(
-            'bills_no' => $bills_no,
-            'payment_content' => $usf['content'],
-            'number' => $usf['number'],
-            'unit_price' => $usf['unit_price'],
-        ));
-        $amount+=$usf['number'] * $usf['unit_price'];
-    }
-
-    $value[] = array(
-        'bills_no'=> $bills_no,
-        'payment_unit' => $unit,
-        'payment_method' => $method,
-        'amount' => $amount,
-        'contact' => $contact,
-        'update_date' => time(),
-    );
-    $fields = array('bills_no','payment_unit','payment_method', 'amount','contact','update_date');
-
-    $query = db_insert('bills_billing')->fields($fields)->values($value);
-    $update_query = db_update('bills')
-      ->fields(array(
-        'status' => '已开具',
-        'amount' => $amount,
-      ))
-      ->condition('billsno', $bills_no, '=');
-    $transaction = db_transaction();
-    try {
-        $query_usf->execute();
-        $query->execute();
-        $update_query->execute();
-        bills_log_write_row($bills_no,$user->uid,'开具');
-        drupal_set_message(t("票据开具成功"));
-    } catch (Exception $e) {
-        $transaction->rollback();
-        watchdog_exception('billing error', $e);
-        drupal_set_message('票据开具失败，请联系管理员', 'error');
-    }
-}
-
-function bills_billing_callback(){
-    $page_content = '';
-    $page_content .= theme('bills_billing_main');
-    return $page_content;
 }
 
 function bills_billing_theme() {
@@ -169,18 +115,6 @@ function get_billingable_bills_type(){
     return $rows;
 }
 
-function bills_type_change_callback(){
-    $type =$_POST['type'];
-    $ava_no = get_ava_bills_no($type);
-    $ava_type_useful = get_type_useful_by_name($type);
-    
-    $rst = array(
-        'ava_no' =>$ava_no,
-        'ava_type_useful' =>$ava_type_useful,
-    );
-   
-    echo drupal_json_output($rst);
-}
 
 function get_ava_bills_no($type){
     
@@ -196,58 +130,3 @@ function get_ava_bills_no($type){
     $result = $query->execute()->fetchField() ;
     return $result;
 }
-
-function bills_billing_submit(){
-    $data = $_POST['data'];
-    $bills_no = $data['no'];
-    $unit = $data['unit'];
-    $method = $data['method'];
-    $contact = $data['contact'];
-    $usfs = $data['usf'];
-
-    global $user;
-    $amount = 0;
-    $usf_fields = array('bills_no','payment_content','number','unit_price');
-    $query_usf = db_insert('bills_billing_detail')->fields($usf_fields);
-    
-    foreach ($usfs as $usf) {
-        $query_usf->values(array(
-            'bills_no' => $bills_no,
-            'payment_content' => $usf['content'],
-            'number' => $usf['number'],
-            'unit_price' => $usf['unit_price'],
-        ));
-        $amount+=$usf['number'] * $usf['unit_price'];
-    }
-   
-    $value[] = array(
-        'bills_no'=> $bills_no,
-        'payment_unit' => $unit,
-        'payment_method' => $method,
-        'amount' => $amount,
-        'contact' => $contact,
-        'update_date' => time(),
-    );
-    $fields = array('bills_no','payment_unit','payment_method', 'amount','contact','update_date');
-
-    $query = db_insert('bills_billing')->fields($fields)->values($value);
-    $update_query = db_update('bills')
-      ->fields(array(
-        'status' => '已开具',
-        'amount' => $amount,
-      ))
-      ->condition('billsno', $bills_no, '=');
-    $transaction = db_transaction();
-    try {
-        $query_usf->execute();
-        $query->execute();
-        $update_query->execute();
-        bills_log_write_row($bills_no,$user->uid,'开具');
-        drupal_set_message(t("票据开具成功"));
-    } catch (Exception $e) {
-        $transaction->rollback();
-        watchdog_exception('billing error', $e);
-        drupal_set_message('票据开具失败，请联系管理员', 'error');
-    }
-}
-
