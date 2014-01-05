@@ -201,6 +201,23 @@ function bills_log_form_submit($form, &$form_state) {
 }
 
 
+function bills_log_start_end($start,$end,$uid,$opt,$opt_re_uid = null){
+
+    $values[] = array(
+        'opt_bills_no' => $start.'～'.$end,
+        'opt_uid' => $uid,
+        'opt_type' => $opt,
+        'opt_re_uid' => $opt_re_uid,
+        'opt_date' => time(),
+    );
+   
+    $fields = array('opt_bills_no', 'opt_uid', 'opt_type', 'opt_re_uid','opt_date');
+
+    $query = db_insert('bills_log')->fields($fields);
+    $query->values($values);
+    $query->execute();
+}
+
 function bills_log_write_array($bills_nos,$uid,$opt,$opt_re_uid = null){
     $values = array();
     foreach ($bills_nos as $bills_no) {

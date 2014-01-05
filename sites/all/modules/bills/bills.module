@@ -168,6 +168,7 @@ function bills_create_form_validate($form, &$form_state) {
 }
 
 function bills_create_form_submit($form, &$form_state) {
+    global $user;
     $start = $form_state['values']['billsno_start'] + 0;
     $end = $form_state['values']['billsno_end'] + 0;
     $type = $form_state['values']['billsno_type'];
@@ -177,12 +178,13 @@ function bills_create_form_submit($form, &$form_state) {
         $values[] = array(
             'billsno' => $i,
             'type' => $type,
-            'status' => '可用',
+            'status' => '',
             'amount' => 0,
             'createdate' => time(),
             'lastupdate' => time(),
         );
     }
+    
     $fields = array('billsno', 'type', 'status', 'amount', 'createdate', 'lastupdate');
 
     $query = db_insert('bills')->fields($fields);
@@ -190,10 +192,13 @@ function bills_create_form_submit($form, &$form_state) {
         $query->values($record);
     }
 
+    $transaction = db_transaction();
     try {
         $result = $query->execute();
+        bills_log_start_end($start,$end, $user->uid, '录入');
         drupal_set_message(t("票据录入成功"));
     } catch (Exception $e) {
+        $transaction->rollback();
         watchdog_exception('bills input error', $e);
         drupal_set_message('票据录入失败，请联系管理员', 'error');
     }

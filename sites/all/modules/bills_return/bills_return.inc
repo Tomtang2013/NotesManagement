@@ -1,50 +1,24 @@
 <?php
 function bills_return_form($form, &$form_state) {
-    $header = array(
-        'billsno' => t('票据编号'),
-        'type' => t('票据类型'),
-        'status' => t('票据状态'),
-        'amount' => t('票据金额'),
-    );
-    $query = db_select('bills', 'b')
-                    ->extend('PagerDefault');
-
-    $fields = array('billsno', 'type', 'status', 'amount');
-
-    global $user;
-    $query->fields('b', $fields);
-    $str_query = $query
-                    ->condition('b.status', '已分配', '=')
-                    ->condition('b.distribution_uid', $user->uid, '=')
-                    ->limit(10)
-                    ->orderBy('b.billsno');
-    $result = $str_query->execute();
-
-    $rows = array();
-    foreach ($result as $row) {
-        $rows[$row->billsno] = array(
-            'billsno' => $row->billsno,
-            'type' => $row->type,
-            'status' => $row->status,
-            'amount' => $row->amount,
-        );
-    }
-    $form = array();
-
-    $form['description'] = array(
+     $form['description'] = array(
         '#type' => 'item',
         '#title' => t("票据退回"),
     );
-
-    $form['table'] = array(
-        '#type' => 'tableselect',
-        '#header' => $header,
-        '#options' => $rows,
-        '#multiple' => TRUE,
+    $form['billsno_start'] = array(
+        '#type' => 'textfield',
+        '#size' => '20',
+        '#required' => TRUE,
+        '#maxlength' => '10',
+        '#title' => t('起始票据编号'),
     );
 
-    $form['pager'] = array('#markup' => theme('pager'));
-
+    $form['billsno_end'] = array(
+        '#type' => 'textfield',
+        '#size' => '20',
+        '#required' => TRUE,
+        '#maxlength' => '10',
+        '#title' => t('结束票据编号'),
+    );
 
      $form['submit'] = array(
         '#type' => 'submit',
@@ -57,40 +31,123 @@ function bills_return_form($form, &$form_state) {
 
 
 function bills_return_form_validate($form, &$form_state) {
-   $table = $form_state['values']['table'] ;
-   $rst = 0;
-   foreach($table as $row){
-       if($row !=0){
-           $rst = $row;
-            break;
-       }
-   }
-   if($rst == 0)
-       form_set_error('', t('请选择需要退回的票据编号.'));
+    $start = $form_state['values']['billsno_start'] + 0;
+    $end = $form_state['values']['billsno_end'] + 0;
+    if (!is_int($start) || $start <= 0)
+        form_set_error('billsno_start', t('起始票据编号必须是数字.'));
+    if (!is_int($end) || $end <= 0)
+        form_set_error('billsno_end', t('结束票据编号必须是数字.'));
+    if ($start > $end) {
+        form_set_error('billsno_end', t('结束票据编号不能小于起始票据编号。'));
+    }
+
+    $count = return_bills_have_no($start,$end);
+
+    if($count==0){
+         form_set_error('billsno_start', t('该票据段未含有可退回票据。'));
+    } else if($count !=$end - $start+1){
+         form_set_error('billsno_start', t('该票据段含有他人票据。'));
+    }
+
 }
 
-function bills_return_form_submit($form, &$form_state) {
-   $table = $form_state['values']['table'] ;
+function return_bills_have_no($start,$end){
+     global $user;
+      $query = db_select('bills', 'b')
+      ->fields( 'b',array('billsno'))
+      ->condition('billsno', $start, '>=')
+      ->condition('billsno', $end, '<=')
+      ->condition(db_or()->condition('status', '已开具')
+                       ->condition('status', '已作废')
+                       ->condition('status', '已报错')
+                        ->condition('status', '已分配'))
+      ->condition('distribution_uid', $user->uid);
+      $no = $query->execute()->fetchAll();
+      return count($no);
+}
 
-   $bill_nos = array();
-   foreach($table as $row){
-       if($row > 0){
-           $bill_nos[] =$row;
-       }
-   }
-  global $user;
+
+function bills_return_form_submit($form, &$form_state) {
+    $start = $form_state['values']['billsno_start'] + 0;
+    $end = $form_state['values']['billsno_end'] + 0;
+
+    global $user;
     $query = db_update('bills')
-      ->fields(array(
-        'distribution_uid' => $user->uid,
-        'status' => '已退回',
-      ))
-      ->condition('billsno', $bill_nos, 'in');
+                    ->fields(array(
+                        'status' => '已退回',
+                    ))
+                    ->condition('billsno', $start, '>=')
+                    ->condition('billsno', $end, '<=')
+                    ->condition('status', '已分配')
+                    ->condition('distribution_uid', $user->uid);
+
+    $black_nos = db_select('bills','b')
+                     ->fields( 'b',array('billsno'))
+                    ->condition('billsno', $start, '>=')
+                    ->condition('billsno', $end, '<=')
+                    ->condition(db_or()->condition('status', '已开具')
+                                       ->condition('status', '已作废')
+                                       ->condition('status', '已报错'))
+                    ->condition('distribution_uid', $user->uid)
+                    ->execute()->fetchAll();
+
+    $values = array();
+    $time = time();
+    $no =$user->uid .''. $time;
+    
+    $values = get_return_start_end($no,$time,$start,$end,$user->uid,$black_nos);
+    
+    $insert_query = db_insert('bills_return')->fields(
+                array('return_no','return_uid', 'start_no', 'end_no', 'createdate'));
+    foreach ($values as $record) {
+        $insert_query->values($record);
+    }
+ 
+    $transaction = db_transaction();
     try {
         $result = $query->execute();
-        bills_log_write_array($bill_nos,$user->uid,'退票');
-        drupal_set_message(t("票据退回成功"));
+        $insert_query->execute();
+        bills_log_start_end($start,$end, $user->uid, '退回');
+        drupal_set_message(t("票据退回成功,退回编号为:".$no));
     } catch (Exception $e) {
+        $transaction->rollback();
         watchdog_exception('bills return error', $e);
         drupal_set_message('票据退回失败，请联系管理员', 'error');
     }
 }
+
+function get_return_start_end($no,$time,$start,$end,$uid,$blocks){
+    $values = array();
+    $start_no = $start;
+    $end_no = $end;
+    
+    for ($j = 0;$j<count($blocks);$j++ ) {
+        $blocknoClass = $blocks[$j];
+        $blockno = $blocknoClass->billsno + 0;
+        if($start_no == $blockno){
+            $start_no++;
+        } else if($start_no < $blockno){
+            $values[] = array(
+                'return_no' => $no,
+                 'return_uid'=>$uid,
+                'start_no' => $start_no,
+                'end_no' => $blockno - 1,
+                'createdate' => $time,
+            );
+            
+            $start_no = $blockno+1;
+        }
+    }
+
+    if($start_no<=$end_no){
+         $values[] = array(
+            'return_no' => $no,
+            'return_uid'=>$uid,
+            'start_no' => $start_no,
+            'end_no' => $end_no,
+            'createdate' => $time,
+        );
+    }
+    return $values;
+}
+

@@ -1,19 +1,5 @@
 <?php
 
-
-function bills_type_change_callback(){
-    $type =$_POST['type'];
-    $ava_no = get_ava_bills_no($type);
-    $ava_type_useful = get_type_useful_by_name($type);
-
-    $rst = array(
-        'ava_no' =>$ava_no,
-        'ava_type_useful' =>$ava_type_useful,
-    );
-
-    echo drupal_json_output($rst);
-}
-
 function bills_billing_callback(){
     $page_content = '';
     $page_content .= theme('bills_billing_main');

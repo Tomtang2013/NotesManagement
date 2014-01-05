@@ -98,6 +98,21 @@ function bills_billing_theme() {
     );
 }
 
+
+function bills_type_change_callback(){
+    $type =$_POST['type'];
+    $ava_no = get_ava_bills_no($type);
+    $ava_type_useful = get_type_useful_by_name($type);
+
+    $rst = array(
+        'ava_no' =>$ava_no,
+        'ava_type_useful' =>$ava_type_useful,
+    );
+
+    echo drupal_json_output($rst);
+}
+
+
 function get_billingable_bills_type(){
     $query = db_select('bills', 'b');
     global $user;
@@ -110,6 +125,7 @@ function get_billingable_bills_type(){
 
     $rows = array();
     foreach ($result as $row) {
+        if( $row->type == '支票')continue;
         $rows[$row->type] = $row->type;
     }
     return $rows;
