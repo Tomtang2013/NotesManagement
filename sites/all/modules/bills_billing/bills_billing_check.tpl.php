@@ -136,13 +136,13 @@ if(empty($ava_no)){
 <div class="bills-billing-form-item">
     <div class="billing-item">
         <label for="edit-bills-type">票据类型 <span class="form-required" title="此项必填。">*</span></label>
-       <input type="text" id="edit-bills-type" name="bills_type" value="支票"
+       <input type="text" id="edit-bills-type" name="bills_type" value="支票"  autocomplete="off"
                size="20" maxlength="20" class="form-text required" readonly="true"/>
     </div>
     <div class="billing-item">
         <label for="edit-bills-no">可用编号 <span class="form-required" title="此项必填。">*</span></label>
         <input type="text" id="edit-bills-no" name="bills_no" value="<?php print $ava_no?>"
-               size="20" maxlength="20" class="form-text required" readonly="true"/>
+               size="20" maxlength="20" autocomplete="off" class="form-text required" readonly="true"/>
     </div>
     <div style="clear:both;"></div>
 </div>
@@ -151,20 +151,20 @@ if(empty($ava_no)){
     <div class="billing-item">
         <label for="edit-check-account">收款人账号 </label>
         <input type="text" id="edit-check-account" name="check_account" value=""
-               onKeyUp="this.value=this.value.replace(/\D/g,'')"
+               onKeyUp="this.value=this.value.replace(/\D/g,'')" autocomplete="off"
                onafterpaste="this.value=this.value.replace(/\D/g,'')"
                size="40" maxlength="40" class="form-text " />
     </div>
     <div class="billing-item">
         <label for="edit-check-org">收款单位 </label>
-        <input type="text" id="edit-check-org" name="check_org" value=""
+        <input type="text" id="edit-check-org" name="check_org" value="" autocomplete="off"
                size="40" maxlength="40" class="form-text " />
     </div>
 </div>
 <div class="bills-billing-form-item">
      <div class="billing-item">
         <label for="edit-check-bank">开户银行 </label>
-        <input type="text" id="edit-check-bank" name="check_bank" value=""
+        <input type="text" id="edit-check-bank" name="check_bank" value="" autocomplete="off"
                size="40" maxlength="40" class="form-text " />
      </div>
     <div class="billing-item">
@@ -179,12 +179,12 @@ if(empty($ava_no)){
 <div class="bills-billing-form-item">
      <div class="billing-item">
         <label for="edit-check-usefor">用途 </label>
-        <input type="text" id="edit-check-usefor" name="check_usefor" value=""
+        <input type="text" id="edit-check-usefor" name="check_usefor" value="" autocomplete="off"
                size="40" maxlength="40" class="form-text required" />
     </div>
      <div class="billing-item">
         <label for="edit-bills-money">金额 <span class="form-required" title="此项必填。">*</span></label>
-        <input class="money form-text"  type="text" id="edit-bills-money"
+        <input class="money form-text"  type="text" id="edit-bills-money" autocomplete="off"
                            name="edit_bills_money" value="" size="40" maxlength="40" />
     </div>
 

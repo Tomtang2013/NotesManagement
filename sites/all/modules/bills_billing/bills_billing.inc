@@ -29,15 +29,20 @@ function bills_billing_submit(){
         $amount+=$usf['number'] * $usf['unit_price'];
     }
 
+    $return_status = '';
+    if($method == '暂借'){
+        $return_status = '未归还';
+    }
     $value[] = array(
         'bills_no'=> $bills_no,
         'payment_unit' => $unit,
         'payment_method' => $method,
+        'return_status' => $return_status,
         'amount' => $amount,
         'contact' => $contact,
         'update_date' => time(),
     );
-    $fields = array('bills_no','payment_unit','payment_method', 'amount','contact','update_date');
+    $fields = array('bills_no','payment_unit','payment_method','return_status', 'amount','contact','update_date');
 
     $query = db_insert('bills_billing')->fields($fields)->values($value);
     $update_query = db_update('bills')

@@ -410,7 +410,6 @@ function menu_unserialize($data, $map) {
             }
         } else {
             watchdog('menu', 'menu_unserialize problem %data', array('%data' => $data), WATCHDOG_ERROR);
-            dd($data);
         }
         return $data;
     } else {

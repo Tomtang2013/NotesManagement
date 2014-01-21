@@ -45,19 +45,46 @@ function bills_search_menu() {
     return $items;
 }
 
+function set_search_value($get, &$form_state, $key) {
+    if (!empty($get[$key])) {
+        $form_state['values'][$key] = $get[$key];
+    }else {
+        $form_state['values'][$key] = '';
+    }
+}
+
+function set_search_url(&$array, &$form_state, $key) {
+    if (!empty($form_state['values'][$key])) {
+        $array[$key] = $form_state['values'][$key];
+    } 
+}
+
 function bills_search_form($form, &$form_state) {
+    if ($_GET && empty($form_state['pager_click']) ) {
+        set_search_value($_GET, $form_state, 'bills_no_start');
+        set_search_value($_GET, $form_state, 'bills_no_end');
+        set_search_value($_GET, $form_state, 'bills_user');
+        set_search_value($_GET, $form_state, 'bills_status');
+        set_search_value($_GET, $form_state, 'bills_type');
+        set_search_value($_GET, $form_state, 'billing_date_start');
+        set_search_value($_GET, $form_state, 'billing_date_end');
+        set_search_value($_GET, $form_state, 'amount');
+        set_search_value($_GET, $form_state, 'report_date_start');
+        set_search_value($_GET, $form_state, 'report_date_end');
+    }
+
     $header = array(
         'billsno' => t('编号'),
         'type' => t('类型'),
         'status' => t('状态'),
         'u_name' => t('开票员'),
         'billing_date' => t('开票日期'),
-        'fee_name' => t('项目'),
+        'org' => t('付款单位/个人'),
         'amount' => t('金额'),
         'report_date' => t('结报日期'),
     );
-    $query = db_select('bills', 'b')
-                    ->extend('PagerDefault');
+    $query = db_select('bills', 'b');
+
 
     $fields = array('billsno', 'type', 'status', 'amount', 'report_date');
 
@@ -66,14 +93,15 @@ function bills_search_form($form, &$form_state) {
     $query->fields('b', $fields);
     $query->addField('u', 'name');
     $query->addField('bb', 'update_date');
-    $query->addField('bb', 'fee_name');
+    $query->addField('bb', 'payment_unit');
     $query->leftJoin('users', 'u', 'u.uid = b.distribution_uid');
     $query->leftJoin('bills_billing', 'bb', 'b.billsno = bb.bills_no');
-    $query->limit(10)
-            ->orderBy('b.billsno');
-    
-    $query = set_condition($query,$form_state);
+    $query->orderBy('b.billsno');
+    $query = $query->extend('PagerDefault');
+    $query->limit(10);
+    $query = set_condition($query, $form_state);
     $str_query = $query;
+
     $result = $str_query->execute();
 
     $rows = array();
@@ -84,7 +112,7 @@ function bills_search_form($form, &$form_state) {
             'status' => $row->status,
             'u_name' => $row->name,
             'billing_date' => empty($row->update_date) ? '' : date("Y-m-d", $row->update_date),
-            'fee_name' => $row->fee_name,
+            'org' => $row->payment_unit,
             'amount' => $row->amount,
             'report_date' => empty($row->report_date) ? '' : date("Y-m-d", $row->report_date),
         );
@@ -102,13 +130,14 @@ function bills_search_form($form, &$form_state) {
         '#size' => 20,
         '#title' => t('起始编号'),
         '#prefix' => '<div id="first_line">',
-        
+        '#default_value' => $form_state['values']['bills_no_start'],
     );
 
     $form['search_box']['bills_no_end'] = array(
         '#type' => 'textfield',
         '#size' => 20,
         '#title' => t('截止编号'),
+        '#default_value' => $form_state['values']['bills_no_end'],
     );
 
     $form['search_box']['bills_user'] = array(
@@ -116,6 +145,7 @@ function bills_search_form($form, &$form_state) {
         '#size' => 20,
         '#title' => t('开票员'),
         '#suffix' => '</div >',
+        '#default_value' => $form_state['values']['bills_user'],
     );
 
 
@@ -123,7 +153,8 @@ function bills_search_form($form, &$form_state) {
         '#type' => 'select',
         '#options' => get_bills_type(),
         '#title' => t('票据类型'),
-         '#prefix' => '<div id="sec_line">',
+        '#prefix' => '<div id="sec_line">',
+         '#default_value' => $form_state['values']['bills_type'],
     );
 
     $form['search_box']['bills_status'] = array(
@@ -132,44 +163,59 @@ function bills_search_form($form, &$form_state) {
             '已作废' => '已作废', '已缴销' => '已缴销', '已确认' => '已确认',
             '已退回' => '已退回', '已报错' => '已报错', '已结报' => '已结报',),
         '#title' => t('票据状态'),
+         '#default_value' => $form_state['values']['bills_status'],
     );
 
-    $form['search_box']['billing_date'] = array(
-        '#type' => 'datepicker',
-        '#date_format' => 'd/m/Y',
-        '#maxlength' => '10',
-        '#title' => t('开票日期'),
-        '#suffix' => '</div >',
-    );
-
-    $form['search_box']['fee_name'] = array(
-        '#type' => 'textfield',
-        '#size' => 20,
-        '#title' => t('收费项目'),
-         '#prefix' => '<div id="sec_line">',
-    );
-
-     
     $form['search_box']['amount'] = array(
         '#type' => 'textfield',
         '#size' => 20,
         '#title' => t('金额'),
+        '#suffix' => '</div >',
+          '#default_value' => $form_state['values']['amount'],
     );
 
-    
-    $form['search_box']['report_date'] = array(
+    $form['search_box']['billing_date_start'] = array(
         '#type' => 'datepicker',
         '#date_format' => 'd/m/Y',
         '#maxlength' => '10',
-        '#title' => t('结报日期'),
+        '#title' => t('开票日期起'),
+        '#prefix' => '<div id="sec_line">',
+         '#default_value' => $form_state['values']['billing_date_start'],
+    );
+
+    $form['search_box']['billing_date_end'] = array(
+        '#type' => 'datepicker',
+        '#date_format' => 'd/m/Y',
+        '#maxlength' => '10',
+        '#title' => t('开票日期止'),
+        '#default_value' => $form_state['values']['billing_date_end'],
+    );
+
+
+    $form['search_box']['report_date_start'] = array(
+        '#type' => 'datepicker',
+        '#date_format' => 'd/m/Y',
+        '#maxlength' => '10',
+        '#title' => t('结报日期起'),
+        '#prefix' => '<div id="sec_line">',
+         '#default_value' => $form_state['values']['report_date_start'],
+    );
+
+
+    $form['search_box']['report_date_end'] = array(
+        '#type' => 'datepicker',
+        '#date_format' => 'd/m/Y',
+        '#maxlength' => '10',
+        '#title' => t('结报日期止'),
         '#suffix' => '</div >',
+         '#default_value' => $form_state['values']['report_date_end'],
     );
 
     $form['button'] = array(
         '#type' => 'submit',
         '#value' => '清空检索区',
     );
-    
+
     $form['submit'] = array(
         '#type' => 'submit',
         '#value' => '提交',
@@ -182,58 +228,85 @@ function bills_search_form($form, &$form_state) {
         '#rows' => $rows,
     );
 
-    $form['pager'] = array('#markup' => theme('pager'));
+    $values = array();
+    $total = count($rows);
+    if ($form_state && !empty($form_state['values'])) {
+        $parameters = array();
+        set_search_url($parameters, $form_state, 'bills_no_start');
+        set_search_url($parameters, $form_state, 'bills_no_end');
+        set_search_url($parameters, $form_state, 'bills_user');
+        set_search_url($parameters, $form_state, 'bills_status');
+        set_search_url($parameters, $form_state, 'bills_type');
+        set_search_url($parameters, $form_state, 'billing_date_start');
+        set_search_url($parameters, $form_state, 'billing_date_end');
+        set_search_url($parameters, $form_state, 'amount');
+        set_search_url($parameters, $form_state, 'report_date_start');
+        set_search_url($parameters, $form_state, 'report_date_end');
+        $values = array(
+            'parameters' => $parameters,
+            'quantity' => $total,
+            'not_cover' => 1,
+        );
+    }
+    $form['pager'] = array();
+    $form['pager'] = array('#markup' => theme('pager', $values));
 
     return $form;
 }
 
-function set_condition($query,$form_state){
-   $query = get_form_value($query,$form_state,'bills_no_start','b.billsno','>=');
-   $query = get_form_value($query,$form_state,'bills_no_end','b.billsno','<=');
-   $query = get_form_value($query,$form_state,'bills_user','u.name');
-   $query = get_form_value($query,$form_state,'bills_type','b.type');
-   $query = get_form_value($query,$form_state,'bills_status','b.status');
-   $query = get_form_value($query,$form_state,'billing_date','bb.update_date');
-   $query = get_form_value($query,$form_state,'fee_name','bb.fee_name');
-   $query = get_form_value($query,$form_state,'amount','b.amount');
-   $query = get_form_value($query,$form_state,'report_date','b.report_date');
-
-   return $query;
+function set_condition($query, $form_state) {
+    $query = get_form_value($query, $form_state, 'bills_no_start', 'b.billsno', '>=');
+    $query = get_form_value($query, $form_state, 'bills_no_end', 'b.billsno', '<=');
+    $query = get_form_value($query, $form_state, 'bills_user', 'u.name');
+    $query = get_form_value($query, $form_state, 'bills_type', 'b.type');
+    $query = get_form_value($query, $form_state, 'bills_status', 'b.status');
+    $query = get_form_value($query, $form_state, 'billing_date_start', 'bb.update_date', '>=', true);
+    $query = get_form_value($query, $form_state, 'billing_date_end', 'bb.update_date', '<=', true);
+    $query = get_form_value($query, $form_state, 'amount', 'b.amount');
+    $query = get_form_value($query, $form_state, 'report_date_start', 'b.report_date', '>=', true);
+    $query = get_form_value($query, $form_state, 'report_date_end', 'b.report_date', '<=', true);
+    return $query;
 }
 
-function get_form_value($query,$form_state,$key,$field,$op = '='){
-     $value = '';
-     if(!empty($form_state['values'][$key])){
-         $value = $form_state['values'][$key];
-         $query->condition($field,$value,$op);
-     }
-     return $query;
+function get_form_value($query, $form_state, $key, $field, $op = '=', $isdate = false) {
+    $value = '';
+    if (!empty($form_state['values'][$key])) {
+        $value = $form_state['values'][$key];
+        if ($isdate && !is_array($value)){
+            $value = strtotime($value);
+        }
+        $query->condition($field, $value, $op);
+    }
+    return $query;
 }
+
 function bills_search_form_validate($form, &$form_state) {
-     if($form_state['values']['op'] == '清空检索区')
-         return;
+    if ($form_state['values']['op'] == '清空检索区')
+        return;
     $start = $form_state['values']['bills_no_start'];
     $end = $form_state['values']['bills_no_end'];
     $no_error = false;
-    if (!empty($start) && !is_int($start) && $start+0==0 ){
-         form_set_error('bills_no_start', t('起始编号必须是数字.'));
-         $no_error = true;
+    if (!empty($start) && !is_int($start) && $start + 0 == 0) {
+        form_set_error('bills_no_start', t('起始编号必须是数字.'));
+        $no_error = true;
     }
-       
-    if (!empty($end) &&!is_int($end)&& $end+0==0 ){
+
+    if (!empty($end) && !is_int($end) && $end + 0 == 0) {
         form_set_error('bills_no_end', t('结束编号必须是数字.'));
         $no_error = true;
     }
-        
-    if ($no_error ==false && $start > $end) {
+
+    if ($no_error == false && $start > $end) {
         form_set_error('bills_no_start', t('结束编号不能小于起始编号。'));
     }
 }
 
 function bills_search_form_submit($form, &$form_state) {
-    if($form_state['values']['op'] == '清空检索区')
-         return;
-    $form_state['rebuild'] = TRUE;
+    if ($form_state['values']['op'] == '清空检索区'){
+        drupal_goto('billssearch');
+    } else {
+         $form_state['pager_click'] = true;
+         $form_state['rebuild'] = TRUE;
+    }
+   
 }
-
-

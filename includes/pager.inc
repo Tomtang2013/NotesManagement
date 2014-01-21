@@ -598,6 +598,11 @@ function theme_pager_link($variables) {
   $parameters = $variables['parameters'];
   $attributes = $variables['attributes'];
 
+  $not_cover = 0;
+  if( !empty($variables['not_cover'])){
+      $not_cover =$variables['not_cover'];
+  }
+
   $page = isset($_GET['page']) ? $_GET['page'] : '';
   if ($new_page = implode(',', pager_load_array($page_new[$element], $element, explode(',', $page)))) {
     $parameters['page'] = $new_page;
@@ -607,8 +612,10 @@ function theme_pager_link($variables) {
   if (count($parameters)) {
     $query = drupal_get_query_parameters($parameters, array());
   }
+
   if ($query_pager = pager_get_query_parameters()) {
-    $query = array_merge($query, $query_pager);
+      if($not_cover !=0)
+        $query = array_merge($query, $query_pager);
   }
 
   // Set each pager link title

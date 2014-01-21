@@ -9,6 +9,7 @@ $submit_path = $base_path . 'billing/bills_billing_submit';
 
 <script type="text/javascript">
     jQuery(function(){
+        init();
         jQuery('#edit-add').bind('click',function(){
             if(current_row==3){
                 jQuery(this).attr('disable','true');
@@ -25,11 +26,12 @@ $submit_path = $base_path . 'billing/bills_billing_submit';
             var data = validate();
             var url = '<?php print $submit_path;?>';
             console.log(data);
-            if(data!=""){
+            if(data!=null){
                 jQuery.post(url, {'data':data}, function(re){
                     location.reload();
                 }, 'json');
             }
+            return false;
         });
 
         jQuery('.messages').hide();
@@ -112,7 +114,7 @@ $submit_path = $base_path . 'billing/bills_billing_submit';
     var  current_row = 1;
 //
     function set_line_count_value(count,value){
-        jQuery(count).text(value);
+        jQuery(count).text(value.toFixed(2));
         count_summary();
     }
 
@@ -121,7 +123,7 @@ $submit_path = $base_path . 'billing/bills_billing_submit';
         jQuery('.line-count').each(function(){
             summary_count+=new Number(jQuery(this).text());
         });
-        jQuery('#summary-count').text(summary_count);
+        jQuery('#summary-count').text(summary_count.toFixed(2));
     }
 
     function get_ava_bills_no(){
@@ -165,6 +167,15 @@ $submit_path = $base_path . 'billing/bills_billing_submit';
        
     }
 
+    function init(){
+        jQuery('edit-bills-type').attr('selected', 'selected');
+        jQuery('edit-bills-number').val("");
+        jQuery('edit-bills-unit').val('');
+        jQuery('.tableline').each(function(){
+            jQuery('edit-bills-number').val('');
+            jQuery('edit-bills-unit-price').val('');
+        });
+    }
     function limit_money_input() {
         jQuery("input.money").bind("contextmenu", function(){
             return false;
@@ -206,7 +217,9 @@ $submit_path = $base_path . 'billing/bills_billing_submit';
 <div class="bills-billing-form-item">
     <div class="billing-item">
         <label for="edit-bills-type">请选择票据类型 <span class="form-required" title="此项必填。">*</span></label>
-        <select id="edit-bills-type" name="bills_type" class="form-select required" onchange="get_ava_bills_no()">
+        <select id="edit-bills-type" name="bills_type"
+                autocomplete="off"
+                class="form-select required" onchange="get_ava_bills_no()">
             <option value="" selected="selected">- 选择 -</option>
             <?php
             foreach ($ava_types as $type) {
@@ -218,11 +231,13 @@ $submit_path = $base_path . 'billing/bills_billing_submit';
     <div class="billing-item">
         <label for="edit-bills-no">可用编号 <span class="form-required" title="此项必填。">*</span></label>
         <input type="text" id="edit-bills-number" name="bills_no" value=""
+               autocomplete="off"
                size="20" maxlength="20" class="form-text required" readonly="true"/>
     </div>
     <div class="billing-item">
         <label for="edit-bills-unit">缴款单位/个人 <span class="form-required" title="此项必填。">*</span></label>
         <input  type="text" id="edit-bills-unit" name="edit_bills_unit" value=""
+                autocomplete="off"
                 size="30" maxlength="60" class="form-text required"/>
      </div>
     <div style="clear:both;"></div>
@@ -239,9 +254,11 @@ $submit_path = $base_path . 'billing/bills_billing_submit';
                     </select></td>
                 <td><input class="number form-text" style="width:120px;" type="text" id="edit-bills-number"
                            onKeyUp="this.value=this.value.replace(/\D/g,'')"
+                           autocomplete="off"
                            onafterpaste="this.value=this.value.replace(/\D/g,'')"
                            name="bills_number" value="1" size="11" maxlength="11" /></td>
                 <td><input class="money form-text" style="width:120px;" type="text" id="edit-bills-unit-price"
+                           autocomplete="off"
                            name="edit_bills_unit_price" value="" size="11" maxlength="11" /></td>
                 <td style="width:120px;"><span class="line-count">0</span></td>
                 <td><input type="button" id="edit-add" name="op" value="增加" class="form-submit" /></td>
@@ -266,7 +283,8 @@ $submit_path = $base_path . 'billing/bills_billing_submit';
     </div>
     <div class="billing-item">
         <label for="edit-bills-contact">联系方式 </label>
-        <input type="text" id="edit-bills-contact" name="bills_contact" value="" size="20" maxlength="20"
+        <input type="text" id="edit-bills-contact" name="bills_contact"
+               autocomplete="off" value="" size="20" maxlength="20"
                class="form-text " >
     </div>
 </div>

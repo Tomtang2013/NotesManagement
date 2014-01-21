@@ -178,7 +178,7 @@ function bills_create_form_submit($form, &$form_state) {
         $values[] = array(
             'billsno' => $i,
             'type' => $type,
-            'status' => '',
+            'status' => '可用',
             'amount' => 0,
             'createdate' => time(),
             'lastupdate' => time(),

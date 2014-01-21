@@ -46,10 +46,19 @@ function bills_borrow_menu() {
 }
 
 function bills_borrow_form($form, &$form_state) {
+    if ($_GET && empty($form_state['pager_click']) ) {
+        set_search_value($_GET, $form_state, 'bills_return_status');
+        set_search_value($_GET, $form_state, 'return_date_start');
+        set_search_value($_GET, $form_state, 'return_date_end');
+        set_search_value($_GET, $form_state, 'billing_date_start');
+        set_search_value($_GET, $form_state, 'billing_date_end');
+        set_search_value($_GET, $form_state, 'amount');
+    }
+    
     $header = array(
         'billsno' => t('编号'),
         'type' => t('类型'),
-        'fee_name' => t('项目'),
+//        'fee_name' => t('项目'),
         'amount' => t('金额'),
         'number' => t('数量'),
         'return_date' => t('还款日期'),
@@ -61,7 +70,7 @@ function bills_borrow_form($form, &$form_state) {
     $query->addField('b', 'type');
     $query->addField('b', 'amount');
 
-    $fields = array('bills_no', 'fee_name', 'number', 'return_status','contact');
+    $fields = array('bills_no', 'number', 'return_status','contact');
 
     global $user;
 
@@ -77,8 +86,10 @@ function bills_borrow_form($form, &$form_state) {
     if($user->uid !=1){
         $query->condition('b.distribution_uid', $user->uid, '=');
     }
-    
+
+    $query = set_borrow_condition($query,$form_state);
     $str_query  = $query;
+   
     $result = $str_query->execute();
 
     $rows = array();
@@ -88,8 +99,8 @@ function bills_borrow_form($form, &$form_state) {
             'type' => $row->type,
             'number' => $row->number,
             'amount' => $row->amount,
-            'return_date' => date("Y-m-d",$row->return_date),
-            'fee_name' => $row->fee_name,
+            'return_date' => empty ($row->return_date)?'':date("Y-m-d",$row->return_date),
+//            'fee_name' => $row->fee_name,
             'return_status' => $row->return_status,
             'contact' => $row->contact,
         );
@@ -101,6 +112,70 @@ function bills_borrow_form($form, &$form_state) {
         '#title' => t("暂借票处理"),
     );
 
+    $form['search_box'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('检索'),
+        '#collapsible' => TRUE,
+        '#collapsed' => FALSE,
+        '#prefix' => '<div class="bills-search">',
+        '#suffix' => '</div>',
+
+    );
+
+    $form['search_box']['bills_return_status'] = array(
+        '#type' => 'select',
+        '#options' => array('' => ' - 选择 - ', '已归还' => '已归还', '未归还' => '未归还',),
+        '#title' => t('归还状态'),
+        '#prefix' => '<div id="first_line">',
+    );
+    
+    $form['search_box']['return_date_start'] = array(
+        '#date_format' => 'd/m/Y',
+        '#type' => 'datepicker',
+        '#size' => 10,
+        '#title' => t('还款日期起'),
+    );
+
+    $form['search_box']['return_date_end'] = array(
+         '#date_format' => 'd/m/Y',
+        '#type' => 'datepicker',
+        '#size' => 10,
+        '#title' => t('还款日期止'),
+         '#suffix' => '</div">',
+    );
+
+    $form['search_box']['billing_date_start'] = array(
+         '#date_format' => 'd/m/Y',
+        '#type' => 'datepicker',
+        '#size' => 10,
+        '#title' => t('开票时间起'),
+          '#prefix' => '<div id="sec_line">',
+    );
+
+     $form['search_box']['billing_date_end'] = array(
+         '#date_format' => 'd/m/Y',
+        '#size' => 10,
+         '#type' => 'datepicker',
+        '#title' => t('开票时间止'),
+    );
+
+     $form['search_box']['amount'] = array(
+        '#type' => 'textfield',
+        '#size' => 20,
+        '#title' => t('金额'),
+          '#suffix' => '</div>',
+    );
+
+     $form['search_box']['serach'] = array(
+        '#type' => 'submit',
+        '#value' => '检索',
+    );
+
+      $form['search_box']['clean'] = array(
+        '#type' => 'submit',
+        '#value' => '清空检索区',
+    );
+    
     $form['table'] = array(
         '#type' => 'tableselect',
         '#header' => $header,
@@ -108,12 +183,28 @@ function bills_borrow_form($form, &$form_state) {
         '#multiple' => FALSE,
     );
 
-    $form['pager'] = array('#markup' => theme('pager'));
+    $total = count($rows);
+    if ($form_state && !empty($form_state['values'])) {
+        $parameters = array();
+        set_search_url($parameters, $form_state, 'bills_return_status');
+        set_search_url($parameters, $form_state, 'return_date_start');
+        set_search_url($parameters, $form_state, 'return_date_end');
+        set_search_url($parameters, $form_state, 'billing_date_start');
+        set_search_url($parameters, $form_state, 'billing_date_end');
+        set_search_url($parameters, $form_state, 'amount');
+        $values = array(
+            'parameters' => $parameters,
+            'quantity' => $total,
+                'not_cover' => 1,
+        );
+
+    }
+    
+     $form['pager'] = array('#markup' => theme('pager', $values));
 
     $form['return_date'] = array(
         '#type' => 'datepicker',
         '#date_format' => 'd/m/Y',
-        '#required' => TRUE,
         '#maxlength' => '10',
         '#title' => t('还款日期'),
     );
@@ -133,31 +224,57 @@ function bills_borrow_form($form, &$form_state) {
     return $form;
 }
 
+function set_borrow_condition($query,$form_state){
+   $query = get_form_value($query,$form_state,'return_date_start','bb.return_date','>=',true);
+   $query = get_form_value($query,$form_state,'return_date_end','bb.return_date','<=',true);
+   $query = get_form_value($query,$form_state,'billing_date_start','bb.update_date','>=',true);
+   $query = get_form_value($query,$form_state,'billing_date_end','bb.update_date','<=',true);
+   $query = get_form_value($query,$form_state,'bills_return_status','bb.return_status');
+   $query = get_form_value($query,$form_state,'amount','b.amount');
+//   $query = get_form_value($query,$form_state,'fee_name','bb.fee_name');
+
+   return $query;
+}
+
 function bills_borrow_form_validate($form, &$form_state) {
+    
+    if($form_state['values']['op'] == '清空检索区'
+            || $form_state['values']['op'] == "检索")
+         return;
     $value = $form_state['values']['table'] ;
    if(empty($value))
        form_set_error('', t('请选择需编辑的票据.'));
+   $return_date = $form_state['values']['return_date'] ;
+   if(empty($return_date))
+        form_set_error('return_date', t('请输入还款日期.'));
 
 }
 
 function bills_borrow_form_submit($form, &$form_state) {
-    $bills_no =  $form_state['values']['table'] ;
-    $return_date = $form_state['values']['return_date'];
-    $return_status = $form_state['values']['return_status'];
-    $return_date = strtotime($return_date);
-    $return_status = $return_status == 0?'未归还':'已归还';
-    global $user;
+    if ($form_state['values']['op'] == '清空检索区'){
+         drupal_goto('billsborrow');
+    }else if ($form_state['values']['op'] == "检索"){
+        $form_state['pager_click'] = true;
+        $form_state['rebuild'] = TRUE;
+    }else {
+        $bills_no = $form_state['values']['table'];
+        $return_date = $form_state['values']['return_date'];
+        $return_status = $form_state['values']['return_status'];
+        $return_date = strtotime($return_date);
+        $return_status = $return_status == 0 ? '未归还' : '已归还';
+        global $user;
 
-    $query = db_update('bills_billing')
-      ->fields(array(
-        'return_date' => $return_date,
-        'return_status' => $return_status,
-      ))
-      ->condition('bills_no', $bills_no, '=');
-    try {
-        $result = $query->execute();
-        drupal_set_message(t("暂借票据处理成功"));
-    } catch (Exception $e) {
-        drupal_set_message('暂借票据处理失败，请联系管理员', 'error');
+        $query = db_update('bills_billing')
+                        ->fields(array(
+                            'return_date' => $return_date,
+                            'return_status' => $return_status,
+                        ))
+                        ->condition('bills_no', $bills_no, '=');
+        try {
+            $result = $query->execute();
+            drupal_set_message(t("暂借票据处理成功"));
+        } catch (Exception $e) {
+            drupal_set_message('暂借票据处理失败，请联系管理员', 'error');
+        }
     }
 }
