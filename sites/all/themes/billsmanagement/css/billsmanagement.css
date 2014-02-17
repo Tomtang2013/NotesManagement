@@ -381,3 +381,7 @@ html.js input.form-autocomplete{
 .bills-billing-form-item .error{
     border: 2px solid red;
 }
+
+.page-user .tabs-wrapper {
+    display: none;
+}

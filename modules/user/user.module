@@ -31,6 +31,8 @@ define('USER_REGISTER_VISITORS', 1);
  */
 define('USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL', 2);
 
+
+define('MAX_USER_SIZE', 3);
 /**
  * Implement hook_help().
  */
@@ -3802,6 +3804,7 @@ function user_register_form($form, &$form_state) {
   // Add the final user registration form submit handler.
   $form['#submit'][] = 'user_register_submit';
 
+   
   return $form;
 }
 
@@ -3821,6 +3824,14 @@ function user_register_validate($form, &$form_state) {
  * @see user_register_form()
  */
 function user_register_submit($form, &$form_state) {
+   $query = db_query("select count(uid)from users");
+   $result = $query->fetchField();
+   if($result>=MAX_USER_SIZE){
+       drupal_set_message('用户已达上限，请联系管理员', 'error');
+       return;
+   }
+
+
   $admin = $form_state['values']['administer_users'];
 
   if (!variable_get('user_email_verification', TRUE) || $admin) {
