@@ -25,9 +25,22 @@ $submit_path = $base_path . 'billing/bills_billing_submit';
         jQuery('#edit-submit').bind('click',function(){
             var data = validate();
             var url = '<?php print $submit_path;?>';
-            console.log(data);
             if(data!=null){
                 jQuery.post(url, {'data':data}, function(re){
+                    if('success' == re.message){
+                        
+                        var item =  new Array();
+                        for(var idx in data.usf){
+                            var row = data.usf[idx];
+                            item.push({'item':row.content,'amount':row.number * row.unit_price});
+                        }
+                        
+                        var t={'today': re.today,
+                                'name': re.name,
+                                'item':item
+                                };
+                        myPreview(t);
+                    }
                     location.reload();
                 }, 'json');
             }
@@ -175,6 +188,7 @@ $submit_path = $base_path . 'billing/bills_billing_submit';
             jQuery('edit-bills-number').val('');
             jQuery('edit-bills-unit-price').val('');
         });
+        
     }
     function limit_money_input() {
         jQuery("input.money").bind("contextmenu", function(){
@@ -291,3 +305,8 @@ $submit_path = $base_path . 'billing/bills_billing_submit';
 <div class="bills-billing-form-item" style="padding-top:30px;">
 <input type="button" id="edit-submit" name="op" value="提交" class="form-submit" />
 </div>
+
+<object id="LODOP_OB" classid="clsid:2105C259-1E0C-4534-8141-A753534CB4CA" width=0 height=0>
+    <embed id="LODOP_EM" type="application/x-print-lodop" width=0 height=0
+           pluginspage="<?php print drupal_get_path('module', 'bills_billing').'/print_js/';?>install_lodop32.exe"></embed>
+</object> 

@@ -47,6 +47,9 @@ function bills_type_update_form($form, &$form_state, $type_id) {
                 '#ajax' => array(
                     'callback' => 'add_more_method',
                     'wrapper' => 'names-fieldset-wrapper',
+//                    'trigger_as' => array(
+//                      'name' => 'submit_name'.$key,
+//                    ),
                 ),
             );
         }

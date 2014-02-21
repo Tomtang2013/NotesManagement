@@ -60,7 +60,6 @@ function bills_billing_check_submit() {
 }
 
 function bills_billing_check_auto() {
-//    dd($_POST['name_startsWith']);
     $data = $_POST["data"];
     $str = $data['str'];
     $max_row = $data['max_row'];

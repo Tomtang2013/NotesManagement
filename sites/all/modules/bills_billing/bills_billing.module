@@ -6,7 +6,8 @@
  * Implementation of hook_init
  */
 function bills_billing_init() {
-
+      drupal_add_js(drupal_get_path('module', 'bills_billing') . '/print_js/LodopFuncs.js');
+      drupal_add_js(drupal_get_path('module', 'bills_billing') . '/print_js/print_js.js');
 }
 
 /**

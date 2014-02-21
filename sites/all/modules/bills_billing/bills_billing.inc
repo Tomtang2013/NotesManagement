@@ -51,6 +51,9 @@ function bills_billing_submit(){
         'amount' => $amount,
       ))
       ->condition('billsno', $bills_no, '=');
+
+    $return = array();
+    $return['message'] = 'error';
     $transaction = db_transaction();
     try {
         $query_usf->execute();
@@ -58,10 +61,17 @@ function bills_billing_submit(){
         $update_query->execute();
         bills_log_write_row($bills_no,$user->uid,'开具');
         drupal_set_message(t("票据开具成功"));
+
+        global $user;
+        $return['message'] = 'success';
+        $return['today'] = date('Y/m/d/ h:i:s', time());
+        $return['name'] = $user->name;
     } catch (Exception $e) {
         $transaction->rollback();
         watchdog_exception('billing error', $e);
         drupal_set_message('票据开具失败，请联系管理员', 'error');
     }
+    
+    drupal_json_output($return);
 }
 

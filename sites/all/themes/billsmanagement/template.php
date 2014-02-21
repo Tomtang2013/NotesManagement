@@ -1,6 +1,6 @@
 <?php
 function billsmanagement_pager(){
-    dd('aa');
+   
 }
 ///**
 // * Implements hook_html_head_alter().
