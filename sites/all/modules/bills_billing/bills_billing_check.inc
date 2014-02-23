@@ -62,7 +62,7 @@ function bills_billing_check_submit() {
         $return['month'] = date("m");
         $return['day'] = date("d");
         $return['amount'] = $amount;
-        
+        $return['pop'] = $usefor;
     } catch (Exception $e) {
         $transaction->rollback();
         watchdog_exception('billing error', $e);

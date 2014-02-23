@@ -14,6 +14,22 @@ if(empty($ava_no)){
        limit_money_input();
        jQuery('.messages').hide();
        jQuery('#edit-submit').bind('click',function(){
+//           var year = '2014';
+//           var m = '12';
+//           var d = '31';
+//           var amount = '332.2';
+//            var t={ 'year': year,
+//                                'month': m,
+//                                'day': d,
+//                                'year1': changeDateYear(year),
+//                                'month1': changeDateMonth(m),
+//                                'day1': dayToBig(d),
+//                                'name': '超哥',
+//                                'amount1': amount,
+//                                'amount2':digit_uppercase(amount),
+//                                'amount3':prepareAmount(amount)};
+//                    myCheckPreview(t);
+//            return;
             var data = validate();
             var url = '<?php print $submit_path;?>';
             console.log(data);
@@ -21,18 +37,22 @@ if(empty($ava_no)){
                 jQuery.post(url, {'data':data}, function(re){
                     console.log(re);
                     if('success' == re.message){
-                        var t={'year': re.year,
+                        var t={ 'year': re.year,
                                 'month': re.month,
                                 'day': re.day,
+                                'year1': changeDateYear(re.year),
+                                'month1': changeDateMonth(re.month),
+                                'day1': dayToBig(re.day),
                                 'name': re.name,
+                               'pop':re.pop,
                                 'amount1': re.amount,
                                 'amount2':digit_uppercase(re.amount),
                                 'amount3':prepareAmount(re.amount)};
-                            
-                        console.log(prepareAmount(re.amount));
                         myCheckPreview(t);
+//                        myCheckDesign(t);
+
                     }
-//                    location.reload();
+                    location.reload();
                 }, 'json');
             }
         });

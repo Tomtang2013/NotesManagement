@@ -221,9 +221,10 @@ function CheckCreateFullPage(jsonobj) {
     LODOP.ADD_PRINT_TEXT("51.3mm","26.2mm","26.5mm","5.3mm",jsonobj.name);
     LODOP.ADD_PRINT_TEXT("59.5mm","22.8mm","26.5mm","5.3mm",jsonobj.amount1);
     LODOP.ADD_PRINT_TEXT("64.5mm","22.5mm","35mm","5.3mm",jsonobj.pop);
-    LODOP.ADD_PRINT_TEXT("11.6mm","96.3mm","8.7mm","5.3mm",jsonobj.year);
-    LODOP.ADD_PRINT_TEXT("11.4mm","115.4mm","7.1mm","5.3mm",jsonobj.month);
-    LODOP.ADD_PRINT_TEXT("11.4mm","133.4mm","5.6mm","5.3mm",jsonobj.day);
+   
+    LODOP.ADD_PRINT_TEXT("11.9mm","93.4mm","16.4mm","5.3mm",jsonobj.year1);
+    LODOP.ADD_PRINT_TEXT("11.9mm","113.1mm","14mm","5.3mm",jsonobj.month1);
+    LODOP.ADD_PRINT_TEXT("11.9mm","129.4mm","12.7mm","5.3mm",jsonobj.day1);
     LODOP.ADD_PRINT_TEXT("18.3mm","97.4mm","26.5mm","5.3mm",jsonobj.name);
     LODOP.ADD_PRINT_TEXT("27.8mm","96.8mm","70mm","5.3mm",jsonobj.amount2);
     LODOP.ADD_PRINT_TEXT("38.6mm","96.8mm","35mm","5.3mm",jsonobj.pop);
@@ -282,14 +283,142 @@ function prepareAmount(amount){
     var amount_length = intAmount.length;
     var amount3 = new Array();
     var check_length = 11;
-    for(var j=0;j<check_length - amount_length;j++){
-        amount3.push({'item':''});
+    for(var j=0;j<check_length - amount_length -1;j++){
+        amount3.push({
+            'item':''
+        });
     }
-
+    amount3.push({
+        'item':'￥'
+    });
     for(var j=0;j<amount_length;j++){
-        amount3.push({'item':intAmount[j]});
+        amount3.push({
+            'item':intAmount[j]
+            });
     }
 
     return amount3;
-    
+//    ￥
+}
+
+function ConverToDate(value) {
+    var chinese = ['零','壹', '贰', '叁', '肆',
+    '伍', '陆', '柒', '捌', '玖', '拾'];
+   
+    var result = "";
+    for (var i = 0; i < y.length; i++) {
+        result += chinese[y.charAt(i)];
+    }
+    result += "";
+    if (m.length == 2) {
+        if (m.charAt(0) == "1") {
+            result += ("十" + chinese[m.charAt(1)] + "");
+        }
+    } else {
+        result += (chinese[m.charAt(0)] + "");
+    }
+    if (d.length == 2) {
+        result += (chinese[d.charAt(0)] + "十" + chinese[m.charAt(1)] + "");
+    } else {
+        result += (chinese[d.charAt(0)] + "");
+    }
+    return result;
+}
+
+function changeDateYear(year)//年转换大写
+{
+    var year1 = yearToBig(year.substring(0,1));
+    var year2 = yearToBig(year.substring(1,2));
+    var year3 = yearToBig(year.substring(2,3));
+    var year4 = yearToBig(year.substring(3,4));
+    return year1+year2+year3+ year4 ;
+}
+
+function changeDateMonth(month)//月转化大写
+{
+    return monthToBig(month);
+}
+
+function changeDateDay(day)//日转换大写
+{
+    document.writeln(dayToBig(day) + "    ");
+}
+
+function dayToBig(day){
+    var r2 = parseInt(day);
+    var day;
+
+    if(r2==1) day="零壹";
+    if(r2==2) day="零贰";
+    if(r2==3) day="零叁";
+    if(r2==4) day="零肆";
+    if(r2==5) day="零伍";
+    if(r2==6) day="零陆";
+    if(r2==7) day="零柒";
+    if(r2==8) day="零捌";
+    if(r2==9) day="零玖";
+
+    if(r2==11) day="壹拾壹";
+    if(r2==12) day="壹拾贰";
+    if(r2==13) day="壹拾叁";
+    if(r2==14) day="壹拾肆";
+    if(r2==15) day="壹拾伍";
+    if(r2==16) day="壹拾陆";
+    if(r2==17) day="壹拾柒";
+    if(r2==18) day="壹拾捌";
+    if(r2==19) day="壹拾玖";
+    if(r2==10) day="零壹拾";
+
+    if(r2==21) day="贰拾壹";
+    if(r2==22) day="贰拾贰";
+    if(r2==23) day="贰拾叁";
+    if(r2==24) day="贰拾肆";
+    if(r2==25) day="贰拾伍";
+    if(r2==26) day="贰拾陆";
+    if(r2==27) day="贰拾柒";
+    if(r2==28) day="贰拾捌";
+    if(r2==29) day="贰拾玖";
+    if(r2==20) day="零贰拾";
+
+
+    if(r2==31) day="叁拾壹";
+    if(r2==30) day="零叁拾";
+    return day;
+
+}
+
+function monthToBig(month){//月转化大写
+
+    var  month = parseInt(month);
+    var mon;
+    if(month==1) mon="零壹";
+    if(month==2) mon="零贰";
+    if(month==3) mon="叁";
+    if(month==4) mon="肆";
+    if(month==5) mon="伍";
+    if(month==6) mon="陆";
+    if(month==7) mon="柒";
+    if(month==8) mon="捌";
+    if(month==9) mon="玖";
+    if(month==10) mon="零壹拾";
+    if(month==11) mon="壹拾壹";
+    if(month==12) mon="壹拾贰";
+
+    return  mon;
+
+}
+
+function yearToBig(year){
+    jiaow=year;
+    if(jiaow==1) year="壹"
+    if(jiaow==2) year="贰"
+    if(jiaow==3) year="叁"
+    if(jiaow==4) year="肆"
+    if(jiaow==5) year="伍"
+    if(jiaow==6) year="陆"
+    if(jiaow==7) year="柒"
+    if(jiaow==8) year="捌"
+    if(jiaow==9) year="玖"
+    if(jiaow==0) year="零"
+    return year;
 }
