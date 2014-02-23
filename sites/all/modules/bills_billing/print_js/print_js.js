@@ -1,15 +1,15 @@
 var LODOP;
 
-function myPreview(jsonobj) {
-    CreatePrintPage(jsonobj);
+function myInvoicePreview(jsonobj) {
+    InvoiceCreatePrintPage(jsonobj);
     LODOP.PREVIEW();
 };
-function myDesign(jsonobj) {
-    CreatePrintPage(jsonobj);
+function myInvoiceDesign(jsonobj) {
+    InvoiceCreatePrintPage(jsonobj);
     LODOP.PRINT_DESIGN();
 };
 
-function CreatePrintPage(jsonobj) {
+function InvoiceCreatePrintPage(jsonobj) {
     LODOP=getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));
     LODOP.PRINT_INITA("1mm","1mm","201.6mm","127mm","浙江省地方税务局通用机打发票");
     LODOP.SET_PRINT_STYLE("FontColor","#0000FF");
@@ -58,21 +58,238 @@ function CreatePrintPage(jsonobj) {
 
         LODOP.ADD_PRINT_TEXT((8.2*i+45.5).toString()+"mm","24.9mm","26.5mm","5.3mm",jsonobj.item[i].item);
         LODOP.ADD_PRINT_TEXT((8.2*i+45.5).toString()+"mm","66.7mm","70mm","5.3mm",jsonobj.item[i].amount);
-
-    //LODOP.ADD_PRINT_TEXT("53.7mm","24.9mm","26.5mm","5.3mm","公物赔偿");
-    //LODOP.ADD_PRINT_TEXT("53.7mm","66.7mm","26.5mm","5.3mm","48.30");
-    //LODOP.ADD_PRINT_TEXT("61.4mm","24.9mm","26.5mm","5.3mm","罚款");
-    //LODOP.ADD_PRINT_TEXT("61.4mm","66.7mm","26.5mm","5.3mm","50.00");
-    //LODOP.ADD_PRINT_TEXT("69.1mm","24.9mm","26.5mm","5.3mm","优惠费");
-    //LODOP.ADD_PRINT_TEXT("69.1mm","66.7mm","26.5mm","5.3mm","-4.00");
     }
 
-//LODOP.ADD_PRINT_TEXT("77.5mm","24.9mm","26.5mm","5.3mm","总计");
-//LODOP.ADD_PRINT_TEXT("77.5mm","88.9mm","52.4mm","5.3mm","陆百柒拾捌元叁角零分");
-//LODOP.ADD_PRINT_TEXT("77.3mm","66.7mm","18.5mm","5.3mm","678.30");
+
 };
-function myAddHtml() {
+function myInvoiceAddHtml() {
     LODOP=getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));
     LODOP.PRINT_INIT("tobyqiu的打印");
     LODOP.ADD_PRINT_HTM(10,55,"100%","100%",document.getElementById("textarea01").value);
-};	       
+};
+
+//===========================================================
+
+
+function myCheckPreview(jsonobj) {
+    CheckCreateFullPage(jsonobj);
+    LODOP.PREVIEW();
+};
+function myCheckDesign(jsonobj) {
+    CheckCreateFullPage(jsonobj);
+    LODOP.PRINT_DESIGN();
+};
+
+function CheckCreateFullPage(jsonobj) {
+
+    LODOP = getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));
+    LODOP.PRINT_INITA("0mm","0mm","250mm","80mm","交通银行转账支票");
+
+    LODOP.SET_PRINT_STYLE("FontColor","#0000FF");
+
+    LODOP.ADD_PRINT_SHAPE(2,"0mm","0mm","250mm","80mm",0,1,"#804040");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+    LODOP.ADD_PRINT_SHAPE(2,"0mm","0mm","56.1mm","79.9mm",0,1,"#804040");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+    LODOP.ADD_PRINT_SHAPE(2,"25mm","68mm","145mm","9mm",0,1,"#804040");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+    LODOP.ADD_PRINT_SHAPE(2,"25mm","170mm","43mm","9mm",0,1,"#804040");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+    LODOP.ADD_PRINT_SHAPE(0,"29mm","170mm","43mm","0.3mm",0,1,"#804040");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+
+    var number=new Array("亿","千","百","十","万","千","百","十","元","角","分");
+
+    for(var i=1;i<12;i++){
+        LODOP.ADD_PRINT_SHAPE(1,"25mm",((170+(i*3.9))).toString()+"mm","0.3mm","9mm",0,1,"#804040");
+        LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+        LODOP.ADD_PRINT_TEXT("25.6mm",((170+((i-1)*4))).toString()+"mm","6.6mm","5.3mm",number[i-1]);
+        LODOP.SET_PRINT_STYLEA(0,"FontColor","#800000");
+        LODOP.SET_PRINT_STYLEA(0,"FontSize",8);
+        LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+
+        //add amount3
+        LODOP.ADD_PRINT_TEXT("29.6mm",((170+((i-1)*4))).toString()+"mm","4mm","5.3mm",jsonobj.amount3[i-1].item.toString());
+        LODOP.SET_PRINT_STYLEA(0,"FontSize",8);
+    }
+
+    LODOP.ADD_PRINT_TEXT("6mm","19mm","25mm","10mm","   交通银行\n 转账支票存根");
+    LODOP.SET_PRINT_STYLEA(0,"FontColor","#800000");
+    LODOP.SET_PRINT_STYLEA(0,"FontSize",10);
+    LODOP.SET_PRINT_STYLEA(0,"LineSpacing","0.5mm");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+
+    LODOP.ADD_PRINT_TEXT("16mm","19mm","26.5mm","10mm","30103330\n01010755");
+    LODOP.SET_PRINT_STYLEA(0,"FontColor","#000000");
+    LODOP.SET_PRINT_STYLEA(0,"FontSize",12);
+    LODOP.SET_PRINT_STYLEA(0,"FontName","System");
+    LODOP.SET_PRINT_STYLEA(0,"LineSpacing","1mm");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+
+    LODOP.ADD_PRINT_TEXT("28mm","13mm","26.5mm","5.3mm","附加信息");
+    LODOP.SET_PRINT_STYLEA(0,"FontColor","#800000");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+
+    LODOP.ADD_PRINT_SHAPE(0,"32mm","13mm","40mm","0.3mm",0,1,"#804040");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+    LODOP.ADD_PRINT_SHAPE(0,"37mm","13mm","40mm","0.3mm",0,1,"#804040");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+    LODOP.ADD_PRINT_SHAPE(0,"42mm","13mm","40mm","0.3mm",0,1,"#804040");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+
+    LODOP.ADD_PRINT_TEXT("42.6mm","11mm","43mm","6mm","出票日期     年   月   日");
+    LODOP.SET_PRINT_STYLEA(0,"FontColor","#800000");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+
+    LODOP.ADD_PRINT_SHAPE(2,"49mm","13mm","40mm","20mm",0,1,"#804040");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+    LODOP.ADD_PRINT_SHAPE(0,"59mm","13mm","40mm","0.3mm",0,1,"#804040");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+    LODOP.ADD_PRINT_SHAPE(0,"64mm","13mm","40mm","0.3mm",0,1,"#804040");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+
+    LODOP.ADD_PRINT_TEXT("49.5mm","13.2mm","13.2mm","5.3mm","收款人");
+    LODOP.SET_PRINT_STYLEA(0,"FontColor","#800000");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+    LODOP.ADD_PRINT_TEXT("59.1mm","13.2mm","9.3mm","5.3mm","金额");
+    LODOP.SET_PRINT_STYLEA(0,"FontColor","#800000");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+    LODOP.ADD_PRINT_TEXT("64.1mm","13.2mm","9.8mm","5.3mm","用途");
+    LODOP.SET_PRINT_STYLEA(0,"FontColor","#800000");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+
+    LODOP.ADD_PRINT_TEXT("69mm","13.2mm","41mm","5.3mm","单位主管         会计");
+    LODOP.SET_PRINT_STYLEA(0,"FontColor","#800000");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+
+    LODOP.ADD_PRINT_TEXT("4mm","94mm","69.3mm","7mm","交通银行转账支票");
+    LODOP.SET_PRINT_STYLEA(0,"LetterSpacing","12");
+    LODOP.SET_PRINT_STYLEA(0,"FontColor","#800000");
+    LODOP.SET_PRINT_STYLEA(0,"FontSize",13);
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+
+    LODOP.ADD_PRINT_TEXT("11.9mm","68mm","26.5mm","5.3mm","出票日期(大写)");
+    LODOP.SET_PRINT_STYLEA(0,"FontColor","#800000");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+    LODOP.ADD_PRINT_TEXT("11.9mm","108mm","6mm","5.3mm","年");
+    LODOP.SET_PRINT_STYLEA(0,"FontColor","#800000");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+    LODOP.ADD_PRINT_TEXT("11.9mm","125mm","6mm","5.3mm","月");
+    LODOP.SET_PRINT_STYLEA(0,"FontColor","#800000");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+    LODOP.ADD_PRINT_TEXT("11.9mm","141mm","6mm","5.3mm","日");
+    LODOP.SET_PRINT_STYLEA(0,"FontColor","#800000");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+
+    LODOP.ADD_PRINT_TEXT("11.9mm","160.1mm","26.5mm","5.3mm","支付行名称");
+    LODOP.SET_PRINT_STYLEA(0,"FontColor","#800000");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+
+    LODOP.ADD_PRINT_TEXT("20mm","68mm","26.5mm","5.3mm","收款人");
+    LODOP.SET_PRINT_STYLEA(0,"FontColor","#800000");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+
+    LODOP.ADD_PRINT_TEXT("20mm","160mm","26.5mm","5.3mm","出票人帐号");
+    LODOP.SET_PRINT_STYLEA(0,"FontColor","#800000");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+
+    LODOP.ADD_PRINT_TEXT("26mm","69mm","26.5mm","9.3mm","人民币\n(大写)");
+    LODOP.SET_PRINT_STYLEA(0,"FontColor","#800000");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+
+    LODOP.ADD_PRINT_TEXT("39mm","68mm","26.5mm","5.3mm","用途");
+    LODOP.SET_PRINT_STYLEA(0,"FontColor","#800000");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+    LODOP.ADD_PRINT_TEXT("45mm","68mm","26.5mm","5.3mm","上列款项请从");
+    LODOP.SET_PRINT_STYLEA(0,"FontColor","#800000");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+    LODOP.ADD_PRINT_TEXT("52mm","68mm","26.5mm","5.3mm","我账户内支出");
+    LODOP.SET_PRINT_STYLEA(0,"FontColor","#800000");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+    LODOP.ADD_PRINT_TEXT("57mm","68mm","26.5mm","5.3mm","出票人签章");
+    LODOP.SET_PRINT_STYLEA(0,"FontColor","#800000");
+    LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
+
+
+    //add other
+    LODOP.ADD_PRINT_TEXT("28.3mm","29.6mm","19.6mm","5.3mm",jsonobj.attach1);
+    LODOP.ADD_PRINT_TEXT("33.6mm","12.7mm","39.7mm","5.3mm",jsonobj.attach2);
+    LODOP.ADD_PRINT_TEXT("37.8mm","11.9mm","36.5mm","5.3mm",jsonobj.attach3);
+    LODOP.ADD_PRINT_TEXT("42.1mm","24.9mm","10.8mm","5.3mm",jsonobj.year);
+    LODOP.ADD_PRINT_TEXT("42.3mm","36.2mm","6.4mm","5.3mm",jsonobj.month);
+    LODOP.ADD_PRINT_TEXT("42.3mm","43.1mm","5.6mm","5.3mm",jsonobj.day);
+    LODOP.ADD_PRINT_TEXT("51.3mm","26.2mm","26.5mm","5.3mm",jsonobj.name);
+    LODOP.ADD_PRINT_TEXT("59.5mm","22.8mm","26.5mm","5.3mm",jsonobj.amount1);
+    LODOP.ADD_PRINT_TEXT("64.5mm","22.5mm","35mm","5.3mm",jsonobj.pop);
+    LODOP.ADD_PRINT_TEXT("11.6mm","96.3mm","8.7mm","5.3mm",jsonobj.year);
+    LODOP.ADD_PRINT_TEXT("11.4mm","115.4mm","7.1mm","5.3mm",jsonobj.month);
+    LODOP.ADD_PRINT_TEXT("11.4mm","133.4mm","5.6mm","5.3mm",jsonobj.day);
+    LODOP.ADD_PRINT_TEXT("18.3mm","97.4mm","26.5mm","5.3mm",jsonobj.name);
+    LODOP.ADD_PRINT_TEXT("27.8mm","96.8mm","70mm","5.3mm",jsonobj.amount2);
+    LODOP.ADD_PRINT_TEXT("38.6mm","96.8mm","35mm","5.3mm",jsonobj.pop);
+}
+
+        
+function digit_uppercase(n) {
+    var fraction = ['角', '分'];
+    var digit = [
+    '零', '壹', '贰', '叁', '肆',
+    '伍', '陆', '柒', '捌', '玖'
+    ];
+    var unit = [
+    ['元', '万', '亿'],
+    ['', '拾', '佰', '仟']
+    ];
+    var head = n < 0? '欠': '';
+    n = Math.abs(n);
+    var s = '';
+    for (var i = 0; i < fraction.length; i++) {
+        s += (digit[Math.floor(n * 10 * Math.pow(10, i)) % 10] + fraction[i]).replace(/零./, '');
+    }
+    s = s || '整';
+    n = Math.floor(n);
+    for (var i = 0; i < unit[0].length && n > 0; i++) {
+        var p = '';
+        for (var j = 0; j < unit[1].length && n > 0; j++) {
+            p = digit[n % 10] + unit[1][j] + p;
+            n = Math.floor(n / 10);
+        }
+        s = p.replace(/(零.)*零$/, '')
+        .replace(/^$/, '零')
+        + unit[0][i] + s;
+    }
+    return head + s.replace(/(零.)*零元/, '元')
+    .replace(/(零.)+/g, '零')
+    .replace(/^整$/, '零元整');
+}
+
+function prepareAmount(amount){
+    var sAmounts = amount.split(".");
+    var intAmount = sAmounts[0].split("");
+    var floatAmount;
+   
+    if(sAmounts.length>1){
+        sAmounts[1] = sAmounts[1]+'0';
+        floatAmount = sAmounts[1].split("");
+    } else {
+        floatAmount = '00'.split("");
+    }
+
+    for (var i=0; i < floatAmount.length; i++){
+        intAmount.push(floatAmount[i]);
+    }
+
+    var amount_length = intAmount.length;
+    var amount3 = new Array();
+    var check_length = 11;
+    for(var j=0;j<check_length - amount_length;j++){
+        amount3.push({'item':''});
+    }
+
+    for(var j=0;j<amount_length;j++){
+        amount3.push({'item':intAmount[j]});
+    }
+
+    return amount3;
+    
+}

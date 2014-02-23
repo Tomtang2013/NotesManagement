@@ -28,18 +28,23 @@ $submit_path = $base_path . 'billing/bills_billing_submit';
             if(data!=null){
                 jQuery.post(url, {'data':data}, function(re){
                     if('success' == re.message){
-                        
                         var item =  new Array();
                         for(var idx in data.usf){
                             var row = data.usf[idx];
                             item.push({'item':row.content,'amount':row.number * row.unit_price});
                         }
-                        
+                        var total = 0;
+                        for(var it in item){
+                            total = total + item[it].amount;
+                        }
+                        total = total+ " " + digit_uppercase(total);
+                        item.push({'item':'合计','amount' : total});
+                        console.log(item);
                         var t={'today': re.today,
                                 'name': re.name,
-                                'item':item
-                                };
-                        myPreview(t);
+                                'item':item};
+
+                        myInvoicePreview(t);
                     }
                     location.reload();
                 }, 'json');

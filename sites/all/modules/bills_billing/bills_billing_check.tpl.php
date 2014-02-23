@@ -19,7 +19,20 @@ if(empty($ava_no)){
             console.log(data);
             if(data!=null){
                 jQuery.post(url, {'data':data}, function(re){
-                    location.reload();
+                    console.log(re);
+                    if('success' == re.message){
+                        var t={'year': re.year,
+                                'month': re.month,
+                                'day': re.day,
+                                'name': re.name,
+                                'amount1': re.amount,
+                                'amount2':digit_uppercase(re.amount),
+                                'amount3':prepareAmount(re.amount)};
+                            
+                        console.log(prepareAmount(re.amount));
+                        myCheckPreview(t);
+                    }
+//                    location.reload();
                 }, 'json');
             }
         });
@@ -195,3 +208,8 @@ if(empty($ava_no)){
 <div class="bills-billing-form-item" style="padding-top:30px;">
 <input type="button" id="edit-submit" name="op" value="提交" class="form-submit" />
 </div>
+
+<object id="LODOP_OB" classid="clsid:2105C259-1E0C-4534-8141-A753534CB4CA" width=0 height=0>
+    <embed id="LODOP_EM" type="application/x-print-lodop" width=0 height=0
+           pluginspage="<?php print drupal_get_path('module', 'bills_billing').'/print_js/';?>install_lodop32.exe"></embed>
+</object> 
