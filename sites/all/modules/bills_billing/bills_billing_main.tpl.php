@@ -39,7 +39,6 @@ $submit_path = $base_path . 'billing/bills_billing_submit';
                         }
                         total = total+ " " + digit_uppercase(total);
                         item.push({'item':'合计','amount' : total});
-                        console.log(item);
                         var t={'today': re.today,
                                 'name': re.name,
                                 'item':item};

@@ -14,25 +14,8 @@ if(empty($ava_no)){
        limit_money_input();
        jQuery('.messages').hide();
        jQuery('#edit-submit').bind('click',function(){
-//           var year = '2014';
-//           var m = '12';
-//           var d = '31';
-//           var amount = '332.2';
-//            var t={ 'year': year,
-//                                'month': m,
-//                                'day': d,
-//                                'year1': changeDateYear(year),
-//                                'month1': changeDateMonth(m),
-//                                'day1': dayToBig(d),
-//                                'name': '超哥',
-//                                'amount1': amount,
-//                                'amount2':digit_uppercase(amount),
-//                                'amount3':prepareAmount(amount)};
-//                    myCheckPreview(t);
-//            return;
             var data = validate();
             var url = '<?php print $submit_path;?>';
-            console.log(data);
             if(data!=null){
                 jQuery.post(url, {'data':data}, function(re){
                     if('success' == re.message){

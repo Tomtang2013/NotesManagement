@@ -64,7 +64,7 @@ function bills_billing_submit(){
 
         global $user;
         $return['message'] = 'success';
-        $return['today'] = date('Y/m/d/ h:i:s', time());
+        $return['today'] = date('Y/m/d', time());
         $return['name'] = $user->name;
     } catch (Exception $e) {
         $transaction->rollback();

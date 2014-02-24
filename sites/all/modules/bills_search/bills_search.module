@@ -6,7 +6,8 @@
  * Implementation of hook_init
  */
 function bills_search_init() {
-
+      drupal_add_js(drupal_get_path('module', 'bills_billing') . '/print_js/LodopFuncs.js');
+      drupal_add_js(drupal_get_path('module', 'bills_billing') . '/print_js/print_js.js');
 }
 
 /**
@@ -40,6 +41,13 @@ function bills_search_menu() {
         'page arguments' => array('bills_search_form'),
         'access arguments' => array('bills_search'),
         'weight' => 110,
+    );
+
+     $items['billssearch/print/%'] = array(
+        'title' => t('票据打印'),
+        'page callback' => 'bills_print_call_back',
+        'page arguments' => array(2),
+        'access arguments' => array('bills_search'),
     );
 
     return $items;
@@ -82,6 +90,7 @@ function bills_search_form($form, &$form_state) {
         'org' => t('付款单位/个人'),
         'amount' => t('金额'),
         'report_date' => t('结报日期'),
+//        'opt' => t('重置'),
     );
     $query = db_select('bills', 'b');
 
@@ -110,16 +119,22 @@ function bills_search_form($form, &$form_state) {
     $result = $str_query->execute();
 
     $rows = array();
+    
     foreach ($result as $row) {
+        $status = $row->status;
+        if($status == '已开具')
+            $status = $status.l(t(' 打印'), 'billssearch/print/'.$row->billsno,
+                    array('attributes' => array('class' =>'print-link'),'html' => true));
         $rows[] = array(
             'billsno' => $row->billsno,
             'type' => $row->type,
-            'status' => $row->status,
+            'status' => $status, //$row->status,
             'u_name' => $row->name,
             'billing_date' => empty($row->update_date) ? '' : date("Y-m-d", $row->update_date),
             'org' => $row->payment_unit,
             'amount' => $row->amount,
             'report_date' => empty($row->report_date) ? '' : date("Y-m-d", $row->report_date),
+//            'opt' =>  l(t('重置'), 'billssearch/print/'.$row->billsno),
         );
     }
     $form = array();
@@ -213,7 +228,7 @@ function bills_search_form($form, &$form_state) {
         '#maxlength' => '10',
         '#title' => t('结报日期止'),
         '#suffix' => '</div >',
-         '#default_value' => $form_state['values']['report_date_end'],
+        '#default_value' => $form_state['values']['report_date_end'],
     );
 
     $form['button'] = array(
@@ -225,6 +240,13 @@ function bills_search_form($form, &$form_state) {
         '#type' => 'submit',
         '#value' => '提交',
         '#suffix' => '<hr />'
+    );
+    
+     $form['print'] = array(
+        '#type' => 'item',
+        '#title' => "",
+        '#markup' => '<div style=";">' .theme('bills_search_print')
+        . '</div>',
     );
 
     $form['table'] = array(
@@ -253,9 +275,11 @@ function bills_search_form($form, &$form_state) {
             'not_cover' => 1,
         );
     }
+     
+
     $form['pager'] = array();
     $form['pager'] = array('#markup' => theme('pager', $values));
-
+   
     return $form;
 }
 
@@ -314,4 +338,56 @@ function bills_search_form_submit($form, &$form_state) {
          $form_state['rebuild'] = TRUE;
     }
    
+}
+
+function bills_search_theme() {
+    return array(
+        'bills_search_print' => array(
+            'template' => 'bills_search_print',
+            'path' => drupal_get_path('module', 'bills_search')
+        ),
+//        'bills_billing_check' => array(
+//            'template' => 'bills_billing_check',
+//            'path' => drupal_get_path('module', 'bills_billing')
+//        ),
+    );
+}
+
+function bills_print_call_back($bills_no){
+    $query = db_select('bills', 'b');
+    $fields = array('billsno', 'type', 'status', 'amount','createdate');
+    $query->fields('b', $fields);
+    $query->condition('billsno',$bills_no);
+    $bills = $query->execute()->fetchObject();
+    global $user;
+    $return = array();
+    $return['name'] = $user->name;
+    
+    if($bills->type == '支票'){
+        $query_check = db_select('bills_billing_check', 'bbc');
+        $query_check->fields('bbc', array('bills_no', 'account', 'org', 'bank','usefor'));
+        $query_check->condition('bills_no',$bills_no);
+        $result = $query_check->execute()->fetchObject();
+        $return['account'] = $result->account;
+        $return['pop'] = $result->usefor;
+        $return['year'] = date("Y",$bills->createdate);
+        $return['month'] = date("m",$bills->createdate);
+        $return['day'] = date("d",$bills->createdate);
+        $return['amount'] = $bills->amount;
+        $return['type'] = 'check';
+    } else {
+        $query_detail = db_select('bills_billing_detail', 'bbd');
+        $query_detail->fields('bbd', array('payment_content', 'number', 'unit_price'));
+        $query_detail->condition('bills_no',$bills_no);
+        $results = $query_detail->execute()->fetchAll();
+        $items = array();
+        foreach($results as $row){
+            $items[] = array('content'=>$row->payment_content,'amount'=>($row->number * $row->unit_price));
+        }
+        $return['items'] = $items;
+        $return['today'] = date('Y/m/d', $bills->createdate);
+        $return['type'] = 'bills';
+        $return['amount'] = $bills->amount;
+    }
+    drupal_json_output($return);
 }
