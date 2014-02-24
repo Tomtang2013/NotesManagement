@@ -35,7 +35,6 @@ if(empty($ava_no)){
             console.log(data);
             if(data!=null){
                 jQuery.post(url, {'data':data}, function(re){
-                    console.log(re);
                     if('success' == re.message){
                         var t={ 'year': re.year,
                                 'month': re.month,

@@ -94,12 +94,17 @@ function bills_search_form($form, &$form_state) {
     $query->addField('u', 'name');
     $query->addField('bb', 'update_date');
     $query->addField('bb', 'payment_unit');
+//    $query->leftJoin('users', 'u', 'u.uid = b.distribution_uid');
     $query->leftJoin('users', 'u', 'u.uid = b.distribution_uid');
     $query->leftJoin('bills_billing', 'bb', 'b.billsno = bb.bills_no');
     $query->orderBy('b.billsno');
     $query = $query->extend('PagerDefault');
     $query->limit(10);
     $query = set_condition($query, $form_state);
+    if($user->uid!=1){
+        $query->condition('u.uid', $user->uid);
+    }
+   
     $str_query = $query;
 
     $result = $str_query->execute();
