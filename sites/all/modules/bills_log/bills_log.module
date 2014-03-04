@@ -158,7 +158,7 @@ function _set_condition($query,$form_state){
    $query = _get_form_value($query,$form_state,'bills_no_start','bl.opt_bills_no','>=');
    $query = _get_form_value($query,$form_state,'bills_no_end','bl.opt_bills_no','<=');
    $query = _get_form_value($query,$form_state,'opt_user','u.name');
-   $query = _get_form_value($query,$form_state,'opt_type','bl.type');
+   $query = _get_form_value($query,$form_state,'opt_type','bl.opt_type');
    $query = _get_form_value($query,$form_state,'opt_date','bl.opt_date');
 
    return $query;

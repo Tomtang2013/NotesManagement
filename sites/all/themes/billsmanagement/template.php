@@ -1,6 +1,6 @@
 <?php
-function billsmanagement_pager(){
-   
+function billsmanagement_pager($variables){
+   return theme_pager($variables);
 }
 ///**
 // * Implements hook_html_head_alter().
