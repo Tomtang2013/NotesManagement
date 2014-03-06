@@ -40,10 +40,23 @@ function dashboard_menu() {
         'weight' => -47,
         'type' => MENU_CALLBACK,
     );
+
+     $items['login'] = array(
+        'title' => t('主页'),
+        'page callback' => 'login_call_back',
+        'access arguments' => array('login'),
+        'weight' => -47,
+        'type' => MENU_CALLBACK,
+    );
     return $items;
 }
 
 function dashboard_call_back() {
+    $pageContent = '';
+    return $pageContent;
+}
+
+function login_call_back(){
     $pageContent = '';
     return $pageContent;
 }

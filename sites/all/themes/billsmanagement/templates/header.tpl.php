@@ -1,3 +1,15 @@
+<script type="text/javascript">
+    jQuery(function(){
+        jQuery( ".menu" ).find('a').each(function(){
+            if( '/NotesManagement/dashboard' == jQuery(this).attr('href')){
+                jQuery(this).parent().hide();
+            } else if( '/NotesManagement/node/add' == jQuery(this).attr('href')){
+                jQuery(this).parent().hide();
+            }
+        });
+    });
+
+</script>
 <header id="header" class="clearfix" role="banner">
     <hgroup>
         <?php if ($logo): ?>
