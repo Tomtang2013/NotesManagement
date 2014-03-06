@@ -41,10 +41,19 @@ function dashboard_menu() {
         'type' => MENU_CALLBACK,
     );
 
-     $items['login'] = array(
+     $items['login/%'] = array(
         'title' => t('主页'),
         'page callback' => 'login_call_back',
-        'access arguments' => array('login'),
+        'page arguments' => array(1),
+        'access arguments' => array('dashboard'),
+        'weight' => -47,
+        'type' => MENU_CALLBACK,
+    );
+
+     $items['login'] = array(
+        'title' => t('主页'),
+        'page callback' => 'login_call_back_no_name',
+        'access arguments' => array('dashboard'),
         'weight' => -47,
         'type' => MENU_CALLBACK,
     );
@@ -52,14 +61,32 @@ function dashboard_menu() {
 }
 
 function dashboard_call_back() {
+    global $user;
+    if($user->uid == 0)
+        drupal_goto('user/login');
     $pageContent = '';
     return $pageContent;
 }
 
-function login_call_back(){
-    $pageContent = '';
-    return $pageContent;
+function login_call_back_no_name(){
+    session_destroy();
+    drupal_goto('user/login');
 }
+
+function login_call_back($login_name){
+//    session_destroy();
+    $account = user_load_by_name($login_name);
+    if(!empty($account)){
+         global $user;
+        $user = user_load($account->uid);
+        user_login_finalize();
+        drupal_goto('dashboard');
+    } else {
+        echo 'There is no such user in system!';
+    }
+   
+}
+
 
 function message_display(){
     $output = "";
