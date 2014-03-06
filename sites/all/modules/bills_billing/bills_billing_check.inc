@@ -61,6 +61,7 @@ function bills_billing_check_submit() {
         $return['year'] = date("Y");
         $return['month'] = date("m");
         $return['day'] = date("d");
+        $return['org'] = $org;
         $return['amount'] = $amount;
         $return['pop'] = $usefor;
     } catch (Exception $e) {

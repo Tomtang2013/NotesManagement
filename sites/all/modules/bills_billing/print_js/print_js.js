@@ -99,9 +99,10 @@ function CheckCreateFullPage(jsonobj) {
     LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
 
     var number=new Array("亿","千","百","十","万","千","百","十","元","角","分");
+    
 
     for(var i=1;i<12;i++){
-        LODOP.ADD_PRINT_SHAPE(1,"25mm",((170+(i*3.9))).toString()+"mm","0.3mm","9mm",0,1,"#804040");
+        LODOP.ADD_PRINT_SHAPE(1,"25mm",((170+((i-1)*3.9))).toString()+"mm","0.3mm","9mm",0,1,"#804040");
         LODOP.SET_PRINT_STYLEA(0,"PreviewOnly",1);
         LODOP.ADD_PRINT_TEXT("25.6mm",((170+((i-1)*4))).toString()+"mm","6.6mm","5.3mm",number[i-1]);
         LODOP.SET_PRINT_STYLEA(0,"FontColor","#800000");
@@ -225,7 +226,7 @@ function CheckCreateFullPage(jsonobj) {
     LODOP.ADD_PRINT_TEXT("11.9mm","93.4mm","16.4mm","5.3mm",jsonobj.year1);
     LODOP.ADD_PRINT_TEXT("11.9mm","113.1mm","14mm","5.3mm",jsonobj.month1);
     LODOP.ADD_PRINT_TEXT("11.9mm","129.4mm","12.7mm","5.3mm",jsonobj.day1);
-    LODOP.ADD_PRINT_TEXT("18.3mm","97.4mm","26.5mm","5.3mm",jsonobj.name);
+    LODOP.ADD_PRINT_TEXT("18.3mm","97.4mm","26.5mm","5.3mm",jsonobj.org);
     LODOP.ADD_PRINT_TEXT("27.8mm","96.8mm","70mm","5.3mm",jsonobj.amount2);
     LODOP.ADD_PRINT_TEXT("38.6mm","96.8mm","35mm","5.3mm",jsonobj.pop);
 }
@@ -265,25 +266,12 @@ function digit_uppercase(n) {
 }
 
 function prepareAmount(amount){
-    var sAmounts = amount.split(".");
-    var intAmount = sAmounts[0].split("");
-    var floatAmount;
-   
-    if(sAmounts.length>1){
-        sAmounts[1] = sAmounts[1]+'0';
-        floatAmount = sAmounts[1].split("");
-    } else {
-        floatAmount = '00'.split("");
-    }
-
-    for (var i=0; i < floatAmount.length; i++){
-        intAmount.push(floatAmount[i]);
-    }
-
+    amount = amount * 100;
+    var intAmount = (amount+'').split("");
     var amount_length = intAmount.length;
     var amount3 = new Array();
     var check_length = 11;
-    for(var j=0;j<check_length - amount_length -1;j++){
+    for(var j=0;j<check_length - amount_length-1;j++){
         amount3.push({
             'item':''
         });
@@ -291,10 +279,11 @@ function prepareAmount(amount){
     amount3.push({
         'item':'￥'
     });
-    for(var j=0;j<amount_length;j++){
+   
+    for(var j=0;j<amount_length ;j++){
         amount3.push({
             'item':intAmount[j]
-            });
+        });
     }
 
     return amount3;

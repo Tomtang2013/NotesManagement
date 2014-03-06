@@ -26,10 +26,12 @@ if(empty($ava_no)){
                                 'month1': changeDateMonth(re.month),
                                 'day1': dayToBig(re.day),
                                 'name': re.name,
-                               'pop':re.pop,
+                                'pop':re.pop,
+                                'org':re.org,
                                 'amount1': re.amount,
                                 'amount2':digit_uppercase(re.amount),
                                 'amount3':prepareAmount(re.amount)};
+                       
                         myCheckPreview(t);
 //                        myCheckDesign(t);
 
@@ -57,7 +59,6 @@ if(empty($ava_no)){
                                         value: item.account
                                     }
                                 }));
-                                
                                 jQuery('.ui-corner-all a').one('click',function(){
                                    var select_item = auto_list[jQuery(this).parent().index()];
                                    jQuery('#edit-check-org').val(select_item['org']);
