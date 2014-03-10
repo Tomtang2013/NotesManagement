@@ -3827,7 +3827,7 @@ function user_register_submit($form, &$form_state) {
    $query = db_query("select count(uid)from users");
    $result = $query->fetchField();
    if($result>=MAX_USER_SIZE){
-       drupal_set_message('用户已达上限，请联系管理员', 'error');
+      drupal_set_message('&#29992;&#25143;&#24050;&#36798;&#19978;&#38480;&#65292;&#35831;&#32852;&#31995;&#31649;&#29702;&#21592;', 'error');
        return;
    }
 
