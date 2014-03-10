@@ -46,6 +46,16 @@ function bills_log_menu() {
 }
 
 function bills_log_form($form, &$form_state) {
+//     dd( $form_state['values']['opt_type']);
+    
+    if ($_GET && empty($form_state['pager_click']) ) {
+        set_search_value($_GET, $form_state, 'bills_no_start');
+        set_search_value($_GET, $form_state, 'bills_no_end');
+        set_search_value($_GET, $form_state, 'opt_user');
+        set_search_value($_GET, $form_state, 'opt_type');
+        set_search_value($_GET, $form_state, 'opt_date');
+    }
+    
     $header = array(
         'opt_bills_no' => t('票据编号'),
         'u_name' => t('操作人'),
@@ -98,6 +108,7 @@ function bills_log_form($form, &$form_state) {
         '#size' => 20,
         '#title' => t('起始编号'),
         '#prefix' => '<div id="first_line">',
+         '#default_value' => $form_state['values']['bills_no_start'],
         
     );
 
@@ -105,6 +116,7 @@ function bills_log_form($form, &$form_state) {
         '#type' => 'textfield',
         '#size' => 20,
         '#title' => t('截止编号'),
+         '#default_value' => $form_state['values']['bills_no_end'],
     );
 
     $form['search_box']['opt_user'] = array(
@@ -112,6 +124,7 @@ function bills_log_form($form, &$form_state) {
         '#size' => 20,
         '#title' => t('操作员'),
         '#suffix' => '</div >',
+         '#default_value' => $form_state['values']['opt_user'],
     );
 
 
@@ -122,6 +135,7 @@ function bills_log_form($form, &$form_state) {
                             '缴销'=>'缴销','缴销确认'=>'缴销确认','结报'=>'结报',),
         '#title' => t('操作类型'),
          '#prefix' => '<div id="sec_line">',
+        '#default_value' => $form_state['values']['opt_type'],
     );
 
     $form['search_box']['opt_date'] = array(
@@ -130,6 +144,7 @@ function bills_log_form($form, &$form_state) {
         '#maxlength' => '10',
         '#title' => t('操作日期'),
         '#suffix' => '</div >',
+        '#default_value' => $form_state['values']['opt_date'],
     );
 
     $form['button'] = array(
@@ -149,7 +164,25 @@ function bills_log_form($form, &$form_state) {
         '#rows' => $rows,
     );
 
-    $form['pager'] = array('#markup' => theme('pager'));
+    $values = array();
+    $total = count($rows);
+    if ($form_state && !empty($form_state['values'])) {
+        $parameters = array();
+        set_search_url($parameters, $form_state, 'bills_no_start');
+        set_search_url($parameters, $form_state, 'bills_no_end');
+        set_search_url($parameters, $form_state, 'opt_user');
+        set_search_url($parameters, $form_state, 'opt_type');
+        set_search_url($parameters, $form_state, 'opt_date');
+
+        $values = array(
+            'parameters' => $parameters,
+            'quantity' => $total,
+            'not_cover' => 1,
+        );
+    }
+
+    $form['pager'] = array();
+    $form['pager'] = array('#markup' => theme('pager', $values));
 
     return $form;
 }
@@ -195,9 +228,12 @@ function bills_log_form_validate($form, &$form_state) {
 }
 
 function bills_log_form_submit($form, &$form_state) {
-    if($form_state['values']['op'] == '清空检索区')
-         return;
-    $form_state['rebuild'] = TRUE;
+    if ($form_state['values']['op'] == '清空检索区'){
+        drupal_goto('billssearch');
+    } else {
+         $form_state['pager_click'] = true;
+         $form_state['rebuild'] = TRUE;
+    }
 }
 
 
