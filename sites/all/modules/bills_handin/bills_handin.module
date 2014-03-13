@@ -29,6 +29,9 @@ function bills_handin_permission() {
         'bills_handin' => array(
             'title' => t('票据缴销'),
         ),
+        'bills_handin_check' => array(
+            'title' => t('票据缴销确认'),
+        ),
     );
 }
 
@@ -48,9 +51,8 @@ function bills_handin_menu() {
         'title' => t('票据缴销确认'),
         'page callback' => 'drupal_get_form',
         'page arguments' => array('bills_handin_check_form'),
-        'access arguments' => array('bills_handin'),
+        'access arguments' => array('bills_handin_check'),
         'file' => 'bills_handin_check.inc',
-        'access arguments' => array('bills_handin'),
         'weight' => 80,
     );
 

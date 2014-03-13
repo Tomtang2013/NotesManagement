@@ -29,6 +29,9 @@ function bills_return_permission() {
         'bills_return' => array(
             'title' => t('票据退回'),
         ),
+         'bills_return_check' => array(
+            'title' => t('票据退回确认'),
+        ),
     );
 }
 
@@ -48,9 +51,8 @@ function bills_return_menu() {
         'title' => t('票据退回确认'),
         'page callback' => 'drupal_get_form',
         'page arguments' => array('bills_return_check_form'),
-        'access arguments' => array('bills_return'),
+        'access arguments' => array('bills_return_check'),
         'file' => 'bills_return_check.inc',
-        'access arguments' => array('bills_return'),
         'weight' => 100,
     );
 
