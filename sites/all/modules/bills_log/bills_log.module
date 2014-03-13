@@ -54,6 +54,7 @@ function bills_log_form($form, &$form_state) {
         set_search_value($_GET, $form_state, 'opt_user');
         set_search_value($_GET, $form_state, 'opt_type');
         set_search_value($_GET, $form_state, 'opt_date');
+        set_search_value($_GET, $form_state, 'opt_receiver');
     }
     
     $header = array(
@@ -67,21 +68,23 @@ function bills_log_form($form, &$form_state) {
     $query = db_select('bills_log', 'bl')
                     ->extend('PagerDefault');
 
-    $fields = array('opt_bills_no', 'opt_type', 'opt_date');
+    $fields = array('opt_bills_no', 'opt_type', 'opt_date','opt_re_uid');
 
     global $user;
 
     $query->fields('bl', $fields);
     $query->addField('u', 'name');
-    $query->addField('uu', 'name');
+//    $query->addField('uu', 'name');
+//    $query->addField('bbc.org', 'org');
     $query->leftJoin('users', 'u', 'u.uid = bl.opt_uid');
-    $query->leftJoin('users', 'uu', 'uu.uid = bl.opt_re_uid');
-
+//    $query->leftJoin('users', 'uu', 'uu.uid = bl.opt_re_uid');
+//    $query->leftJoin('bills_billing_check', 'bbc', 'bl.opt_bills_no = bbc.bills_no');
     $query->limit(10)
-            ->orderBy('bl.opt_id');
+          ->orderBy('bl.opt_date', 'DESC');
     
     $query = _set_condition($query,$form_state);
     $str_query = $query;
+
     $result = $str_query->execute();
 
     $rows = array();
@@ -90,7 +93,7 @@ function bills_log_form($form, &$form_state) {
             'opt_bills_no' => $row->opt_bills_no,
              'u_name' => $row->name,
             'opt_type' => $row->opt_type,
-            'uu_name' => $row->uu_name,
+            'uu_name' => $row->opt_re_uid,
             'opt_date' => empty($row->opt_date) ? '' : date("Y-m-d", $row->opt_date),
         );
     }
@@ -128,14 +131,21 @@ function bills_log_form($form, &$form_state) {
     );
 
 
+
     $form['search_box']['opt_type'] = array(
         '#type' => 'select',
-        '#options' => array(''=>' - 选择 -','分配'=>'分配','开票'=>'开票',
+        '#options' => array(''=>' - 选择 -','分配'=>'分配','开票'=>'开票','错票'=>'错票',
                             '废票'=>'废票','退票'=>'退票','退票确认'=>'退票确认',
                             '缴销'=>'缴销','缴销确认'=>'缴销确认','结报'=>'结报',),
         '#title' => t('操作类型'),
-         '#prefix' => '<div id="sec_line">',
+        '#prefix' => '<div id="sec_line">',
         '#default_value' => $form_state['values']['opt_type'],
+    );
+     $form['search_box']['opt_receiver'] = array(
+        '#type' => 'textfield',
+        '#size' => 20,
+        '#title' => t('接收人'),
+        '#default_value' => $form_state['values']['opt_receiver'],
     );
 
     $form['search_box']['opt_date'] = array(
@@ -173,7 +183,8 @@ function bills_log_form($form, &$form_state) {
         set_search_url($parameters, $form_state, 'opt_user');
         set_search_url($parameters, $form_state, 'opt_type');
         set_search_url($parameters, $form_state, 'opt_date');
-
+        set_search_url($parameters, $form_state, 'opt_receiver');
+        
         $values = array(
             'parameters' => $parameters,
             'quantity' => $total,
@@ -193,6 +204,7 @@ function _set_condition($query,$form_state){
    $query = _get_form_value($query,$form_state,'opt_user','u.name');
    $query = _get_form_value($query,$form_state,'opt_type','bl.opt_type');
    $query = _get_form_value($query,$form_state,'opt_date','bl.opt_date');
+   $query = _get_form_value($query,$form_state,'opt_receiver','bl.opt_re_uid');
 
    return $query;
 }

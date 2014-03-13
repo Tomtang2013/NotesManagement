@@ -52,7 +52,7 @@ function bills_billing_check_submit() {
         $query_check->execute();
         $query->execute();
         $update_query->execute();
-        bills_log_write_row($bills_no, $user->uid, '开具');
+        bills_log_write_row($bills_no, $user->uid, '开具',$org);
         drupal_set_message(t("票据开具成功"));
         
         global $user;

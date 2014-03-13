@@ -385,3 +385,7 @@ html.js input.form-autocomplete{
 .page-user .tabs-wrapper {
     display: none;
 }
+
+#sec_line .form-item{
+    margin-top:0px;
+}

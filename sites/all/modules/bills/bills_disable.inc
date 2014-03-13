@@ -29,8 +29,8 @@ function bills_disable_form($form, &$form_state) {
 
 function bills_disable_form_validate($form, &$form_state) {
     $bills_no = $form_state['values']['bills_no'] ;
-    if( is_no_exist($bills_no)){
-        form_set_error('bills_no', t('该编号不存在。'));
+    if( is_no_exist($bills_no,'已分配')){
+        form_set_error('bills_no', t('该编号不存在,或并未“已分配”状态。'));
     }
 
 }

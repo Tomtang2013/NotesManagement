@@ -30,8 +30,8 @@ function bills_wrong_form($form, &$form_state) {
 
 function bills_wrong_form_validate($form, &$form_state) {
     $bills_no = $form_state['values']['bills_no'] ;
-    if( is_no_exist($bills_no)){
-        form_set_error('bills_no', t('该编号不存在。'));
+    if( is_no_exist($bills_no,'已开具')){
+        form_set_error('bills_no', t('该编号不存在,或并未“已开具”状态。'));
     }
 
 }

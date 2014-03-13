@@ -267,9 +267,12 @@ function billsno_disable_autocomplete($string = ""){
   drupal_json_output($matches);
 }
 
-function is_no_exist($bills_no){
-    $bills_no = db_select('bills')->fields('bills',array('billsno'))
-        ->condition('billsno', $bills_no)
-        ->execute()->fetchField();
-    return empty ($bills_no);
+function is_no_exist($bills_no,$status = null){
+    $query = db_select('bills')->fields('bills', array('billsno'))
+                    ->condition('billsno', $bills_no);
+    if(!empty($status)){
+        $query->condition('status', $status);
+    }
+    $bills_no = $query->execute()->fetchField();
+    return empty($bills_no);
 }
